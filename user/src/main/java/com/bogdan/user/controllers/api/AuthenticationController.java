@@ -13,16 +13,22 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/authentications")
 @RequiredArgsConstructor
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    @PostMapping("/registration")
+    @PostMapping("/registerUser")
     @ResponseStatus(HttpStatus.CREATED)
     public void registerNewUser(@RequestBody RegisterRequest registerRequest) {
-        authenticationService.registerNewUser(registerRequest);
+        authenticationService.registerUser(registerRequest);
+    }
+
+    @PostMapping("/registerAdmin")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void registerNewAdmin(@RequestBody RegisterRequest registerRequest) {
+        authenticationService.registerAdmin(registerRequest);
     }
 
     @PostMapping("/login")
