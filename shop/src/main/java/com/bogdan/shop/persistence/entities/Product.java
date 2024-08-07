@@ -40,5 +40,5 @@ public class Product {
     private List<Review> reviews;
 
     @ManyToMany(mappedBy = "products")
-    List<Order> orders;
+    private List<Order> orders;
 }
