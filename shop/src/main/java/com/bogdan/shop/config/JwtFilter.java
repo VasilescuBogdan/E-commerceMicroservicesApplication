@@ -12,6 +12,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -43,14 +47,25 @@ public class JwtFilter extends OncePerRequestFilter {
         token = authHeader.substring(7);
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
-        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        HttpEntity<ValidationResponse> entity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<Void> authResponse = restTemplate.exchange(validationURL, HttpMethod.GET, entity,
-                    Void.class);
+            ResponseEntity<ValidationResponse> authResponse = restTemplate.exchange(validationURL, HttpMethod.GET,
+                    entity, ValidationResponse.class);
 
             if (authResponse.getStatusCode()
                             .is2xxSuccessful()) {
+                ValidationResponse validationResponse = authResponse.getBody();
+                if (validationResponse != null) {
+                    UserDetails userDetails = new UserDetailsImpl(validationResponse.username(),
+                            validationResponse.roles());
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
+                            null, userDetails.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext()
+                                         .setAuthentication(authToken);
+
+                }
                 filterChain.doFilter(request, response);
             }
         } catch (HttpClientErrorException e) {
