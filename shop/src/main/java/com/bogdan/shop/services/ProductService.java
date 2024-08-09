@@ -1,18 +1,19 @@
 package com.bogdan.shop.services;
 
-import com.bogdan.shop.controllers.models.ProductDto;
+import com.bogdan.shop.controllers.models.CreateProductDto;
+import com.bogdan.shop.controllers.models.GetProductDto;
 
 import java.util.List;
 
 public interface ProductService {
 
-    void addProduct(ProductDto product);
+    void addProduct(CreateProductDto product);
 
-    List<ProductDto> getAllProducts();
+    List<GetProductDto> getAllProducts();
 
-    ProductDto getProduct(Long id);
+    GetProductDto getProduct(Long id);
 
     void deleteProduct(Long id);
 
-    void updateProduct(Long id, ProductDto product);
+    void updateProduct(Long id, CreateProductDto product);
 }

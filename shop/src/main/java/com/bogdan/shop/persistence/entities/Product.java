@@ -36,7 +36,7 @@ public class Product {
     private String description;
 
     @OneToMany
-    @JoinColumn(name = "review_id", referencedColumnName = "id")
+    @JoinColumn(name = "product_id", referencedColumnName = "id")
     private List<Review> reviews;
 
     @ManyToMany(mappedBy = "products")

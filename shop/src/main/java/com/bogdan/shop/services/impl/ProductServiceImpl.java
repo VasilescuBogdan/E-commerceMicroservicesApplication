@@ -1,6 +1,8 @@
 package com.bogdan.shop.services.impl;
 
-import com.bogdan.shop.controllers.models.ProductDto;
+import com.bogdan.shop.controllers.models.CreateProductDto;
+import com.bogdan.shop.controllers.models.GetProductDto;
+import com.bogdan.shop.controllers.models.GetReviewProductDto;
 import com.bogdan.shop.persistence.entities.Product;
 import com.bogdan.shop.persistence.repositories.ProductRepository;
 import com.bogdan.shop.services.ProductService;
@@ -17,7 +19,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository repository;
 
     @Override
-    public void addProduct(ProductDto product) {
+    public void addProduct(CreateProductDto product) {
         Product newProduct = Product.builder()
                                     .name(product.name())
                                     .description(product.description())
@@ -29,17 +31,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductDto> getAllProducts() {
+    public List<GetProductDto> getAllProducts() {
         return repository.findAll()
                          .stream()
-                         .map(this::mapProductToProductDto)
+                         .map(this::mapProductToGetProductDto)
                          .toList();
     }
 
     @Override
-    public ProductDto getProduct(Long id) {
+    public GetProductDto getProduct(Long id) {
         return repository.findById(id)
-                         .map(this::mapProductToProductDto)
+                         .map(this::mapProductToGetProductDto)
                          .orElseThrow(() -> new RuntimeException("Product with id " + id + " not found!"));
     }
 
@@ -49,7 +51,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void updateProduct(Long id, ProductDto product) {
+    public void updateProduct(Long id, CreateProductDto product) {
         Product updatedProduct = repository.findById(id)
                                            .orElseThrow(
                                                    () -> new RuntimeException("Product with id " + id + " not found!"));
@@ -59,11 +61,19 @@ public class ProductServiceImpl implements ProductService {
         repository.save(updatedProduct);
     }
 
-    private ProductDto mapProductToProductDto(Product product) {
-        return ProductDto.builder()
-                         .name(product.getName())
-                         .description(product.getDescription())
-                         .price(product.getPrice())
-                         .build();
+    private GetProductDto mapProductToGetProductDto(Product product) {
+        return GetProductDto.builder()
+                            .name(product.getName())
+                            .description(product.getDescription())
+                            .price(product.getPrice())
+                            .reviews(product.getReviews()
+                                            .stream()
+                                            .map(review -> GetReviewProductDto.builder()
+                                                                              .sender(review.getSender())
+                                                                              .message(review.getMessage())
+                                                                              .numberOfStars(review.getNumberOfStars())
+                                                                              .build())
+                                            .toList())
+                            .build();
     }
 }
