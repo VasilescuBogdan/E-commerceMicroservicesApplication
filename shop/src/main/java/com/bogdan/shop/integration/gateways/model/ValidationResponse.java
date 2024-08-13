@@ -1,4 +1,4 @@
-package com.bogdan.shop.config;
+package com.bogdan.shop.integration.gateways.model;
 
 import lombok.Builder;
 
