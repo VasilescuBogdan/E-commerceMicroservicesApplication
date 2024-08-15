@@ -4,6 +4,7 @@ import com.bogdan.shop.controllers.models.AddReviewDto;
 import com.bogdan.shop.controllers.models.GetProductReviewDto;
 import com.bogdan.shop.controllers.models.GetReviewDto;
 import com.bogdan.shop.controllers.models.UpdateReviewDto;
+import com.bogdan.shop.exceptions.ResourceDoesNotExistException;
 import com.bogdan.shop.persistence.entities.Product;
 import com.bogdan.shop.persistence.entities.Review;
 import com.bogdan.shop.persistence.repositories.ProductRepository;
@@ -61,7 +62,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     private Review validateReview(Long id, String sender) {
         Review review = reviewRepository.findById(id)
-                                        .orElseThrow(() -> new RuntimeException("Could not find review with id " + id));
+                                        .orElseThrow(() -> new ResourceDoesNotExistException("Could not find review with id " + id));
         if (!Objects.equals(review.getSender(), sender)) {
             throw new ResourceNotOwnedException("User does not own this review!");
         }

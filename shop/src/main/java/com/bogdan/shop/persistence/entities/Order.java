@@ -1,6 +1,8 @@
 package com.bogdan.shop.persistence.entities;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,6 +32,14 @@ public class Order {
     private Long id;
 
     private String user;
+
+    private String address;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod paymentMethod;
 
     @ManyToMany
     @JoinTable(
