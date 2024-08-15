@@ -15,6 +15,5 @@ spring:
                 dialect: org.hibernate.dialect.MySQLDialect
 server:
     port: 8082
-jwt:
-    validation:
-        url: http://localhost:8081/api/authentications/validate
+user-service:
+    url: http://localhost:8081

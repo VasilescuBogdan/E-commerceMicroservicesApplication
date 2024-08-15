@@ -4,13 +4,13 @@ import com.bogdan.shop.controllers.models.AddReviewDto;
 import com.bogdan.shop.controllers.models.GetProductReviewDto;
 import com.bogdan.shop.controllers.models.GetReviewDto;
 import com.bogdan.shop.controllers.models.UpdateReviewDto;
-import com.bogdan.shop.exceptions.ResourceDoesNotExistException;
+import com.bogdan.shop.util.exceptions.ResourceDoesNotExistException;
 import com.bogdan.shop.persistence.entities.Product;
 import com.bogdan.shop.persistence.entities.Review;
 import com.bogdan.shop.persistence.repositories.ProductRepository;
 import com.bogdan.shop.persistence.repositories.ReviewRepository;
 import com.bogdan.shop.services.ReviewService;
-import com.bogdan.shop.exceptions.ResourceNotOwnedException;
+import com.bogdan.shop.util.exceptions.ResourceNotOwnedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

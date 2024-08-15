@@ -2,7 +2,7 @@ package com.bogdan.shop.services.impl;
 
 import com.bogdan.shop.controllers.models.CreateOrderDto;
 import com.bogdan.shop.controllers.models.GetOrderDto;
-import com.bogdan.shop.exceptions.ResourceDoesNotExistException;
+import com.bogdan.shop.util.exceptions.ResourceDoesNotExistException;
 import com.bogdan.shop.persistence.entities.Order;
 import com.bogdan.shop.persistence.entities.OrderStatus;
 import com.bogdan.shop.persistence.entities.Product;
@@ -42,7 +42,6 @@ public class OrderServiceImpl implements OrderService {
     public void createOrder(String user, CreateOrderDto createOrderDto) {
         repository.save(Order.builder()
                              .orderStatus(OrderStatus.IN_PROGRESS)
-                             .paymentMethod(null)
                              .user(user)
                              .address(createOrderDto.address())
                              .products(createOrderDto.productIds()
@@ -58,7 +57,6 @@ public class OrderServiceImpl implements OrderService {
                           .id(order.getId())
                           .user(order.getUser())
                           .address(order.getAddress())
-                          .paymentMethod(order.getPaymentMethod())
                           .build();
     }
 

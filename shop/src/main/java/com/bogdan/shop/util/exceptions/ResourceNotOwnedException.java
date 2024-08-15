@@ -1,4 +1,4 @@
-package com.bogdan.shop.exceptions;
+package com.bogdan.shop.util.exceptions;
 
 public class ResourceNotOwnedException extends RuntimeException {
     public ResourceNotOwnedException(String message) {

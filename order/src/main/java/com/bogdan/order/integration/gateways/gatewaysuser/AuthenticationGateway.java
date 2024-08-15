@@ -1,6 +1,6 @@
-package com.bogdan.shop.integration.gateways.gatewaysuser;
+package com.bogdan.order.integration.gateways.gatewaysuser;
 
-import com.bogdan.shop.integration.gateways.model.ValidationResponse;
+import com.bogdan.order.integration.gateways.model.ValidationResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
