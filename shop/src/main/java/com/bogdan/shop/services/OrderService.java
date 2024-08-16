@@ -11,4 +11,6 @@ public interface OrderService {
     List<GetOrderDto> getOrder(String user);
 
     void createOrder(String user, CreateOrderDto createOrderDto);
+
+    void finalizeOrder(Long orderId);
 }

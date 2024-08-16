@@ -17,3 +17,9 @@ server:
     port: 8082
 user-service:
     url: http://localhost:8081
+rabbitmq:
+    name:
+        queue: order_details_queue
+        exchange: generate_bill
+    routing:
+        key: bill_key
