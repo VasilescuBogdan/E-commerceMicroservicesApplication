@@ -34,8 +34,7 @@ public class Bill {
 
     private LocalDateTime dateTime;
 
-    @Enumerated(EnumType.STRING)
-    private PaymentType paymentType;
+    private Long orderNumber;
 
     @OneToMany
     private List<Item> items;

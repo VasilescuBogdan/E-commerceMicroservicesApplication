@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class OrderDetailsSender {
+public class MessageSender {
 
     @Value("${rabbitmq.name.exchange}")
     private String exchange;
