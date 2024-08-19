@@ -4,6 +4,7 @@ import com.bogdan.shop.controllers.models.CreateOrderDto;
 import com.bogdan.shop.controllers.models.GetOrderDto;
 import com.bogdan.shop.controllers.models.GetProductDto;
 import com.bogdan.shop.controllers.models.UpdateOrderDto;
+import com.bogdan.shop.integration.messages.model.OrderItem;
 import com.bogdan.shop.integration.messages.model.OrderMessage;
 import com.bogdan.shop.integration.messages.sender.OrderSender;
 import com.bogdan.shop.util.exceptions.OperationNotSupportedException;
@@ -18,6 +19,7 @@ import com.bogdan.shop.util.exceptions.ResourceNotOwnedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -76,7 +78,7 @@ public class OrderServiceImpl implements OrderService {
         order.setProducts(updateOrderDto.productIds()
                                         .stream()
                                         .map(this::getProduct)
-                                        .toList());
+                                        .collect(Collectors.toCollection(ArrayList::new)));
         repository.save(order);
     }
 
@@ -85,13 +87,16 @@ public class OrderServiceImpl implements OrderService {
         Order order = repository.findById(orderId)
                                 .orElseThrow(() -> new ResourceDoesNotExistException(
                                         RESOURCE_DOES_NOT_EXIST_EXCEPTION_MESSAGE));
+        if (order.getOrderStatus() != OrderStatus.CREATED) {
+            throw new OperationNotSupportedException();
+        }
         sender.sendOrderMessage(OrderMessage.builder()
                                             .user(order.getUser())
                                             .address(order.getAddress())
                                             .orderItem(order.getProducts()
                                                             .stream()
-                                                            .collect(Collectors.toMap(Product::getName,
-                                                                    Product::getPrice)))
+                                                            .map(item -> new OrderItem(item.getName(), item.getPrice()))
+                                                            .toList())
                                             .orderNumber(order.getId())
                                             .build());
         order.setOrderStatus(OrderStatus.IN_PROGRESS);

@@ -30,7 +30,6 @@
         <module>order</module>
         <module>shop</module>
         <module>user</module>
-        <module>service-discovery</module>
     </modules>
 
     <dependencies>
@@ -71,10 +70,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
     </dependencies>
 

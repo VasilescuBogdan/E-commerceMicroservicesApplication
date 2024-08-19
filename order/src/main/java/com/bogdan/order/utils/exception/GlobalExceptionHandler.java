@@ -13,4 +13,5 @@ public class GlobalExceptionHandler {
     public String handleExceptions(Exception ex) {
         return ex.getMessage();
     }
+
 }

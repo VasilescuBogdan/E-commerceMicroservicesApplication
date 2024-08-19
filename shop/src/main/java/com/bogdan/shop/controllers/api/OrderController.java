@@ -70,7 +70,6 @@ public class OrderController {
     }
 
     @GetMapping("/finish/{id}")
-    @PreAuthorize("!isAuthenticated()")
     @ResponseStatus(HttpStatus.OK)
     public void finishOrder(@PathVariable("id") Long orderId) {
         service.finishOrder(orderId);

@@ -42,6 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         username = jwtService.extractUsername(token);
         if (username != null && SecurityContextHolder.getContext()
                                                      .getAuthentication() == null) {
+
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
             if (jwtService.isTokenValid(token, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
@@ -49,10 +50,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext()
                                      .setAuthentication(authToken);
-                log.info("User logged with credentials: username ({}), role ({})", username, userDetails.getAuthorities()
-                                                                                                    .stream()
-                                                                                                    .map(GrantedAuthority::getAuthority)
-                                                                                                    .findAny());
+                log.info("User logged with credentials: username ({}), role ({})", username,
+                        userDetails.getAuthorities()
+                                   .stream()
+                                   .map(GrantedAuthority::getAuthority)
+                                   .findAny()
+                                   .get());
             }
         }
         filterChain.doFilter(request, response);

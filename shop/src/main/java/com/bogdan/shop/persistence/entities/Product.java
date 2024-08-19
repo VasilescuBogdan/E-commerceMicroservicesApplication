@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -40,5 +41,5 @@ public class Product {
     private List<Review> reviews;
 
     @ManyToMany(mappedBy = "products")
-    private List<Order> orders;
+    private List<Order> orders = new ArrayList<>();
 }

@@ -35,10 +35,9 @@ public class BillServiceImpl implements BillService {
                             .user(orderDetails.user())
                             .dateTime(LocalDateTime.now())
                             .items(orderDetails.orderItem()
-                                               .entrySet()
                                                .stream()
                                                .map(entry -> itemRepository.save(
-                                                       new Item(null, entry.getKey(), entry.getValue())))
+                                                       new Item(null, entry.name(), entry.price())))
                                                .toList())
                             .build());
     }
@@ -61,9 +60,11 @@ public class BillServiceImpl implements BillService {
 
     @Override
     public void payBill(Long billId) {
-        // handle payment logic (methodology to be determined)
         Bill bill = billRepository.findById(billId)
-                      .orElseThrow(() -> new ResourceDoesNotExistException("Bill does not exist!"));
+                                  .orElseThrow(() -> new ResourceDoesNotExistException("Bill does not exist!"));
+
+        // handle payment logic (methodology to be determined)
+
         orderGateway.setOrderToFinished(bill.getOrderNumber());
     }
 

@@ -2,8 +2,8 @@ package com.bogdan.shop.integration.messages.model;
 
 import lombok.Builder;
 
-import java.util.Map;
+import java.util.List;
 
 @Builder
-public record OrderMessage(String user, String address, Map<String, Float> orderItem, Long orderNumber) {
+public record OrderMessage(String user, String address, List<OrderItem> orderItem, Long orderNumber) {
 }
