@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface BillService {
 
-    void addBill(OrderDetails orderDetails);
+    void createBill(OrderDetails orderDetails);
 
     List<GetBillDto> getBillsUser(String user);
 

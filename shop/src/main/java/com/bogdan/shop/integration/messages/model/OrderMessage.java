@@ -5,5 +5,5 @@ import lombok.Builder;
 import java.util.Map;
 
 @Builder
-public record OrderDetails(String user, String address, Map<String, Float> orderItem, Long orderNumber) {
+public record OrderMessage(String user, String address, Map<String, Float> orderItem, Long orderNumber) {
 }

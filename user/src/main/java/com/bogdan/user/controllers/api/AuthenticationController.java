@@ -9,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,15 +44,8 @@ public class AuthenticationController {
     @GetMapping("/validate")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("isAuthenticated()")
-    public ValidationResponse validateToken() {
-        Authentication authentication = SecurityContextHolder.getContext()
-                                                             .getAuthentication();
-        return ValidationResponse.builder()
-                                 .username(authentication.getName())
-                                 .roles(authentication.getAuthorities()
-                                                      .stream()
-                                                      .map(GrantedAuthority::getAuthority)
-                                                      .toList())
-                                 .build();
+    public ValidationResponse validateToken(Authentication authentication) {
+        // the authentication filter will take care of our token validation
+        return authenticationService.getValidationResponse(authentication);
     }
 }

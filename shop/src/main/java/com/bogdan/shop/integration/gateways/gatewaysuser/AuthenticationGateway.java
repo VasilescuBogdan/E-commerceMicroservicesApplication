@@ -15,7 +15,7 @@ public class AuthenticationGateway {
     @Value("${user-service.url}")
     private String userServiceURL;
 
-    private String authenticationPath = "/api/authentications";
+    private static final String AUTHENTICATION_PATH = "/api/authentications";
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -24,7 +24,7 @@ public class AuthenticationGateway {
         headers.setBearerAuth(token);
         HttpEntity<ValidationResponse> entity = new HttpEntity<>(headers);
         ResponseEntity<ValidationResponse> validationResponse = restTemplate.exchange(
-                userServiceURL + authenticationPath + "/validate", HttpMethod.GET, entity, ValidationResponse.class);
+                userServiceURL + AUTHENTICATION_PATH + "/validate", HttpMethod.GET, entity, ValidationResponse.class);
         if (validationResponse.getStatusCode()
                               .is2xxSuccessful()) {
             return validationResponse.getBody();

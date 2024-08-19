@@ -13,11 +13,11 @@ public class UserDetailsImpl implements UserDetails {
 
     private String username;
 
-    private List<String> roles;
+    private String role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(roles.get(0)));
+        return List.of(new SimpleGrantedAuthority(role));
     }
 
     @Override

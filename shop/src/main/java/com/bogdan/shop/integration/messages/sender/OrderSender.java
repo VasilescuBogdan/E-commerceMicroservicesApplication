@@ -1,6 +1,6 @@
 package com.bogdan.shop.integration.messages.sender;
 
-import com.bogdan.shop.integration.messages.model.OrderDetails;
+import com.bogdan.shop.integration.messages.model.OrderMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class MessageSender {
+public class OrderSender {
 
     @Value("${rabbitmq.name.exchange}")
     private String exchange;
@@ -20,8 +20,8 @@ public class MessageSender {
 
     private final RabbitTemplate rabbitTemplate;
 
-    public void sendOrderDetails(OrderDetails orderDetails) {
-        log.info("Bill details were send: {}", orderDetails);
-        rabbitTemplate.convertAndSend(exchange, routingKey, orderDetails);
+    public void sendOrderMessage(OrderMessage orderMessage) {
+        log.info("Bill details were sent: {}", orderMessage);
+        rabbitTemplate.convertAndSend(exchange, routingKey, orderMessage);
     }
 }

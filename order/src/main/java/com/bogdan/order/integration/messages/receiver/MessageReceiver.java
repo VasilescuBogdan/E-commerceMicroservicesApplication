@@ -17,6 +17,6 @@ public class MessageReceiver {
     @RabbitListener(queues = "${rabbitmq.name.queue}")
     public void consumeOrderDetails(OrderDetails orderDetails) {
         log.info("Details were received: {}", orderDetails);
-        billService.addBill(orderDetails);
+        billService.createBill(orderDetails);
     }
 }

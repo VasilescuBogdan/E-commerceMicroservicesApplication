@@ -3,6 +3,7 @@ package com.bogdan.user.service.impl;
 import com.bogdan.user.controllers.models.LoginRequest;
 import com.bogdan.user.controllers.models.LoginResponse;
 import com.bogdan.user.controllers.models.RegisterRequest;
+import com.bogdan.user.controllers.models.ValidationResponse;
 import com.bogdan.user.service.JwtService;
 import com.bogdan.user.service.AuthenticationService;
 import com.bogdan.user.utils.enums.Role;
@@ -11,6 +12,8 @@ import com.bogdan.user.persistence.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +46,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = userRepository.findByUsername(request.username())
                                   .orElseThrow();
         return new LoginResponse(jwtService.generateToken(user));
+    }
+
+    @Override
+    public ValidationResponse getValidationResponse(Authentication authentication) {
+        return ValidationResponse.builder()
+                                 .username(authentication.getName())
+                                 .role(authentication.getAuthorities()
+                                                     .stream()
+                                                     .map(GrantedAuthority::getAuthority)
+                                                     .findAny()
+                                                     .orElseThrow())
+                                 .build();
     }
 
     private void register(RegisterRequest request, Role role) {

@@ -25,10 +25,11 @@ public class BillServiceImpl implements BillService {
     private final ItemRepository itemRepository;
 
     private final OrderGateway orderGateway;
+
     private final BillRepository billRepository;
 
     @Override
-    public void addBill(OrderDetails orderDetails) {
+    public void createBill(OrderDetails orderDetails) {
         repository.save(Bill.builder()
                             .orderNumber(orderDetails.orderNumber())
                             .user(orderDetails.user())

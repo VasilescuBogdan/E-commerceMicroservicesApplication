@@ -1,4 +1,4 @@
-package com.bogdan.shop.persistence.entities;
+package com.bogdan.shop.util.enums;
 
 public enum OrderStatus {
     CREATED, IN_PROGRESS, FINISHED

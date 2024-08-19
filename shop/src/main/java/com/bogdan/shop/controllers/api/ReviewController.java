@@ -1,7 +1,7 @@
 package com.bogdan.shop.controllers.api;
 
-import com.bogdan.shop.controllers.models.AddReviewDto;
-import com.bogdan.shop.controllers.models.GetReviewDto;
+import com.bogdan.shop.controllers.models.CreateReviewDto;
+import com.bogdan.shop.controllers.models.GetReviewDetailsDto;
 import com.bogdan.shop.controllers.models.UpdateReviewDto;
 import com.bogdan.shop.services.ReviewService;
 import lombok.RequiredArgsConstructor;
@@ -30,14 +30,14 @@ public class ReviewController {
     @PostMapping
     @PreAuthorize("hasAuthority('USER')")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addReview(@RequestBody AddReviewDto review, Principal principal) {
-        service.addReview(principal.getName(), review);
+    public void addReview(@RequestBody CreateReviewDto review, Principal principal) {
+        service.createReview(principal.getName(), review);
     }
 
     @GetMapping
     @PreAuthorize("hasAuthority('USER')")
     @ResponseStatus(HttpStatus.OK)
-    public List<GetReviewDto> getReviewsSender(Principal principal) {
+    public List<GetReviewDetailsDto> getReviewsSender(Principal principal) {
         return service.getReviewsSender(principal.getName());
     }
 

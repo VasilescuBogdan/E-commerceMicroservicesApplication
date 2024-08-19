@@ -1,8 +1,8 @@
 package com.bogdan.shop.services.impl;
 
-import com.bogdan.shop.controllers.models.AddReviewDto;
-import com.bogdan.shop.controllers.models.GetProductReviewDto;
-import com.bogdan.shop.controllers.models.GetReviewDto;
+import com.bogdan.shop.controllers.models.CreateReviewDto;
+import com.bogdan.shop.controllers.models.GetProductDto;
+import com.bogdan.shop.controllers.models.GetReviewDetailsDto;
 import com.bogdan.shop.controllers.models.UpdateReviewDto;
 import com.bogdan.shop.util.exceptions.ResourceDoesNotExistException;
 import com.bogdan.shop.persistence.entities.Product;
@@ -26,7 +26,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ProductRepository productRepository;
 
     @Override
-    public void addReview(String username, AddReviewDto review) {
+    public void createReview(String username, CreateReviewDto review) {
         Review save = reviewRepository.save(Review.builder()
                                                   .numberOfStars(review.numberOfStars())
                                                   .sender(username)
@@ -39,53 +39,54 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public List<GetReviewDto> getReviewsSender(String sender) {
+    public List<GetReviewDetailsDto> getReviewsSender(String sender) {
         return reviewRepository.findBySender(sender)
                                .stream()
-                               .map(this::mapReviewToGetReviewDto)
+                               .map(this::mapReviewToGetReviewDetailsDto)
                                .toList();
     }
 
     @Override
     public void deleteReview(Long id, String sender) {
-        validateReview(id, sender);
-        reviewRepository.deleteById(id);
+        Review review = reviewRepository.findById(id)
+                                        .orElseThrow(() -> new ResourceDoesNotExistException(
+                                                "Could not find review with id " + id));
+        if (!Objects.equals(review.getSender(), sender)) {
+            throw new ResourceNotOwnedException("User does not own this review!");
+        }
+        reviewRepository.delete(review);
     }
 
     @Override
     public void updateReview(UpdateReviewDto updateReviewDto, Long id, String sender) {
-        Review review = validateReview(id, sender);
+        Review review = reviewRepository.findById(id)
+                                        .orElseThrow(() -> new ResourceDoesNotExistException(
+                                                "Could not find review with id " + id));
+        if (!Objects.equals(review.getSender(), sender)) {
+            throw new ResourceNotOwnedException("User does not own this review!");
+        }
         review.setMessage(updateReviewDto.message());
         review.setNumberOfStars(updateReviewDto.numberOfStars());
         reviewRepository.save(review);
     }
 
-    private Review validateReview(Long id, String sender) {
-        Review review = reviewRepository.findById(id)
-                                        .orElseThrow(() -> new ResourceDoesNotExistException("Could not find review with id " + id));
-        if (!Objects.equals(review.getSender(), sender)) {
-            throw new ResourceNotOwnedException("User does not own this review!");
-        }
-        return review;
-    }
-
-    private GetReviewDto mapReviewToGetReviewDto(Review review) {
-        GetProductReviewDto productDto = productRepository.findByReviewsContains(List.of(review))
-                                                          .map(this::mapProductToGetProductReviewDto)
-                                                          .orElseThrow(RuntimeException::new);
-        return GetReviewDto.builder()
-                           .product(productDto)
-                           .sender(review.getSender())
-                           .message(review.getMessage())
-                           .numberOfStars(review.getNumberOfStars())
-                           .build();
-    }
-
-    private GetProductReviewDto mapProductToGetProductReviewDto(Product product) {
-        return GetProductReviewDto.builder()
-                                  .name(product.getName())
-                                  .description(product.getDescription())
-                                  .price(product.getPrice())
+    private GetReviewDetailsDto mapReviewToGetReviewDetailsDto(Review review) {
+        GetProductDto productDto = productRepository.findByReviewsContains(List.of(review))
+                                                    .map(this::mapProductToGetProductDto)
+                                                    .orElseThrow(RuntimeException::new);
+        return GetReviewDetailsDto.builder()
+                                  .product(productDto)
+                                  .sender(review.getSender())
+                                  .message(review.getMessage())
+                                  .numberOfStars(review.getNumberOfStars())
                                   .build();
+    }
+
+    private GetProductDto mapProductToGetProductDto(Product product) {
+        return GetProductDto.builder()
+                            .name(product.getName())
+                            .description(product.getDescription())
+                            .price(product.getPrice())
+                            .build();
     }
 }

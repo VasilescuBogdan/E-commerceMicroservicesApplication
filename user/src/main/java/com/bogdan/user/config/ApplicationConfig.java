@@ -1,4 +1,4 @@
-package com.bogdan.user.configuration;
+package com.bogdan.user.config;
 
 import com.bogdan.user.persistence.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
