@@ -7,7 +7,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,7 +31,7 @@ public class JwtFilter extends OncePerRequestFilter {
         final String token;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            filterChain.doFilter(request, response);
             return;
         }
 
@@ -46,8 +45,6 @@ public class JwtFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext()
                                  .setAuthentication(authToken);
 
-        } else {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
         }
         filterChain.doFilter(request, response);
     }

@@ -59,7 +59,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void finalizeOrder(Long orderId) {
+    public void placeOrder(Long orderId) {
         Order order = getOrderById(orderId);
         order.setOrderStatus(OrderStatus.IN_PROGRESS);
         sender.sendOrderDetails(OrderDetails.builder()
@@ -72,6 +72,13 @@ public class OrderServiceImpl implements OrderService {
                                             .orderNumber(order.getId())
                                             .build());
         orderRepository.save(order);
+    }
+
+    @Override
+    public void setOrderToFinished(Long orderId) {
+        Order order = getOrderById(orderId);
+        order.setOrderStatus(OrderStatus.FINISHED);
+        repository.save(order);
     }
 
     private GetOrderDto mapOrderToGetOrderDto(Order order) {

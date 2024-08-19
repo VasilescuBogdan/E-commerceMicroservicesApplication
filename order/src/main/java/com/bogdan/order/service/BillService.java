@@ -12,4 +12,6 @@ public interface BillService {
     List<GetBillDto> getBillsUser(String user);
 
     List<GetBillDto> getBills();
+
+    void payBill(Long billId);
 }

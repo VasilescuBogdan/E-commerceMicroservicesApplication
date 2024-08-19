@@ -12,5 +12,7 @@ public interface OrderService {
 
     void createOrder(String user, CreateOrderDto createOrderDto);
 
-    void finalizeOrder(Long orderId);
+    void placeOrder(Long orderId);
+
+    void setOrderToFinished(Long orderId);
 }

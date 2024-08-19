@@ -38,11 +38,11 @@ public class OrderController {
         return service.getOrder(principal.getName());
     }
 
-    @GetMapping("/finalize/{id}")
+    @GetMapping("/place/{id}")
     @PreAuthorize("hasAuthority('USER')")
     @ResponseStatus(HttpStatus.OK)
     public void finalizeOrder(@PathVariable("id") Long orderId) {
-        service.finalizeOrder(orderId);
+        service.placeOrder(orderId);
     }
 
     @GetMapping
@@ -50,5 +50,13 @@ public class OrderController {
     @ResponseStatus(HttpStatus.OK)
     public List<GetOrderDto> getOrders() {
         return service.getOrder();
+    }
+
+
+    @GetMapping("/status/{id}")
+    @PreAuthorize("!isAuthenticated()")
+    @ResponseStatus(HttpStatus.OK)
+    public void setOrderToDone(@PathVariable("id") Long orderId) {
+        service.setOrderToFinished(orderId);
     }
 }
