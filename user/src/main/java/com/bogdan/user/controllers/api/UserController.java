@@ -1,6 +1,7 @@
 package com.bogdan.user.controllers.api;
 
-import com.bogdan.user.controllers.models.UserDto;
+import com.bogdan.user.controllers.models.GetUser;
+import com.bogdan.user.controllers.models.UpdateUser;
 import com.bogdan.user.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,14 +27,14 @@ public class UserController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> getAllUsers() {
+    public List<GetUser> getAllUsers() {
         return userService.getAllUsers();
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     @ResponseStatus(HttpStatus.FOUND)
-    public UserDto getUser(@PathVariable("id") Long id) {
+    public GetUser getUser(@PathVariable("id") Long id) {
         return userService.getUser(id);
     }
 
@@ -47,7 +48,7 @@ public class UserController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateUser(@PathVariable("id") long id, @RequestBody UserDto user) {
+    public void updateUser(@PathVariable("id") long id, @RequestBody UpdateUser user) {
         userService.updateUser(id, user);
     }
 }

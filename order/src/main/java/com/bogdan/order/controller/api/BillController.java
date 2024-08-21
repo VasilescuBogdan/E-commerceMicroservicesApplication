@@ -1,6 +1,6 @@
 package com.bogdan.order.controller.api;
 
-import com.bogdan.order.controller.model.GetBillDto;
+import com.bogdan.order.controller.model.GetBill;
 import com.bogdan.order.service.BillService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,14 +24,14 @@ public class BillController {
     @GetMapping("/user")
     @PreAuthorize("hasAuthority('USER')")
     @ResponseStatus(HttpStatus.OK)
-    public List<GetBillDto> getBills(Principal principal) {
+    public List<GetBill> getBills(Principal principal) {
         return billService.getBillsUser(principal.getName());
     }
 
     @GetMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     @ResponseStatus(HttpStatus.OK)
-    public List<GetBillDto> getBills() {
+    public List<GetBill> getBills() {
         return billService.getBills();
     }
 

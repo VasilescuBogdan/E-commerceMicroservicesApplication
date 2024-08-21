@@ -1,7 +1,7 @@
 package com.bogdan.order.service.impl;
 
-import com.bogdan.order.controller.model.GetBillDto;
-import com.bogdan.order.controller.model.ItemDto;
+import com.bogdan.order.controller.model.GetBill;
+import com.bogdan.order.controller.model.GetItem;
 import com.bogdan.order.integration.gateways.gatewaysshop.OrderGateway;
 import com.bogdan.order.integration.messages.model.OrderDetails;
 import com.bogdan.order.persistence.entities.Bill;
@@ -43,7 +43,7 @@ public class BillServiceImpl implements BillService {
     }
 
     @Override
-    public List<GetBillDto> getBillsUser(String user) {
+    public List<GetBill> getBillsUser(String user) {
         return repository.findByUser(user)
                          .stream()
                          .map(this::mapBillToGetBillDto)
@@ -51,7 +51,7 @@ public class BillServiceImpl implements BillService {
     }
 
     @Override
-    public List<GetBillDto> getBills() {
+    public List<GetBill> getBills() {
         return repository.findAll()
                          .stream()
                          .map(this::mapBillToGetBillDto)
@@ -68,22 +68,22 @@ public class BillServiceImpl implements BillService {
         orderGateway.setOrderToFinished(bill.getOrderNumber());
     }
 
-    private GetBillDto mapBillToGetBillDto(Bill bill) {
-        return GetBillDto.builder()
-                         .user(bill.getUser())
-                         .dateTime(bill.getDateTime())
-                         .orderNumber(bill.getOrderNumber())
-                         .items(bill.getItems()
+    private GetBill mapBillToGetBillDto(Bill bill) {
+        return GetBill.builder()
+                      .user(bill.getUser())
+                      .dateTime(bill.getDateTime())
+                      .orderNumber(bill.getOrderNumber())
+                      .items(bill.getItems()
                                     .stream()
-                                    .map(item -> ItemDto.builder()
+                                    .map(item -> GetItem.builder()
                                                         .name(item.getName())
                                                         .price(item.getPrice())
                                                         .build())
                                     .toList())
-                         .total((float) bill.getItems()
+                      .total((float) bill.getItems()
                                             .stream()
                                             .mapToDouble(Item::getPrice)
                                             .sum())
-                         .build();
+                      .build();
     }
 }

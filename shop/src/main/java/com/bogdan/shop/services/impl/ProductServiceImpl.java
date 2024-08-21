@@ -1,8 +1,8 @@
 package com.bogdan.shop.services.impl;
 
-import com.bogdan.shop.controllers.models.CreateUpdateProductDto;
-import com.bogdan.shop.controllers.models.GetProductDetailsDto;
-import com.bogdan.shop.controllers.models.GetReviewDto;
+import com.bogdan.shop.controllers.models.CreateUpdateProduct;
+import com.bogdan.shop.controllers.models.GetProductDetails;
+import com.bogdan.shop.controllers.models.GetReview;
 import com.bogdan.shop.persistence.entities.Product;
 import com.bogdan.shop.persistence.repositories.ProductRepository;
 import com.bogdan.shop.services.ProductService;
@@ -20,7 +20,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository repository;
 
     @Override
-    public void addProduct(CreateUpdateProductDto product) {
+    public void addProduct(CreateUpdateProduct product) {
         Product newProduct = Product.builder()
                                     .name(product.name())
                                     .description(product.description())
@@ -32,7 +32,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<GetProductDetailsDto> getAllProducts() {
+    public List<GetProductDetails> getAllProducts() {
         return repository.findAll()
                          .stream()
                          .map(this::mapProductToGetProductDetailsDto)
@@ -40,7 +40,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public GetProductDetailsDto getProduct(Long id) {
+    public GetProductDetails getProduct(Long id) {
         return repository.findById(id)
                          .map(this::mapProductToGetProductDetailsDto)
                          .orElseThrow(() -> new ResourceDoesNotExistException("Product with id " + id + " not found!"));
@@ -52,7 +52,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void updateProduct(Long id, CreateUpdateProductDto product) {
+    public void updateProduct(Long id, CreateUpdateProduct product) {
         Product updatedProduct = repository.findById(id)
                                            .orElseThrow(() -> new ResourceDoesNotExistException(
                                                    "Product with id " + id + " not found!"));
@@ -62,19 +62,19 @@ public class ProductServiceImpl implements ProductService {
         repository.save(updatedProduct);
     }
 
-    private GetProductDetailsDto mapProductToGetProductDetailsDto(Product product) {
-        return GetProductDetailsDto.builder()
-                                   .name(product.getName())
-                                   .description(product.getDescription())
-                                   .price(product.getPrice())
-                                   .reviews(product.getReviews()
+    private GetProductDetails mapProductToGetProductDetailsDto(Product product) {
+        return GetProductDetails.builder()
+                                .name(product.getName())
+                                .description(product.getDescription())
+                                .price(product.getPrice())
+                                .reviews(product.getReviews()
                                                    .stream()
-                                                   .map(review -> GetReviewDto.builder()
-                                                                              .sender(review.getSender())
-                                                                              .message(review.getMessage())
-                                                                              .numberOfStars(review.getNumberOfStars())
-                                                                              .build())
+                                                   .map(review -> GetReview.builder()
+                                                                           .sender(review.getSender())
+                                                                           .message(review.getMessage())
+                                                                           .numberOfStars(review.getNumberOfStars())
+                                                                           .build())
                                                    .toList())
-                                   .build();
+                                .build();
     }
 }

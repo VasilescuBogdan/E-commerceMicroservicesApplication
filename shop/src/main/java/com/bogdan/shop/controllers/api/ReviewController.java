@@ -1,8 +1,8 @@
 package com.bogdan.shop.controllers.api;
 
-import com.bogdan.shop.controllers.models.CreateReviewDto;
-import com.bogdan.shop.controllers.models.GetReviewDetailsDto;
-import com.bogdan.shop.controllers.models.UpdateReviewDto;
+import com.bogdan.shop.controllers.models.CreateReview;
+import com.bogdan.shop.controllers.models.GetReviewDetails;
+import com.bogdan.shop.controllers.models.UpdateReview;
 import com.bogdan.shop.services.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,14 +30,14 @@ public class ReviewController {
     @PostMapping
     @PreAuthorize("hasAuthority('USER')")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addReview(@RequestBody CreateReviewDto review, Principal principal) {
+    public void addReview(@RequestBody CreateReview review, Principal principal) {
         service.createReview(principal.getName(), review);
     }
 
     @GetMapping
     @PreAuthorize("hasAuthority('USER')")
     @ResponseStatus(HttpStatus.OK)
-    public List<GetReviewDetailsDto> getReviewsSender(Principal principal) {
+    public List<GetReviewDetails> getReviewsSender(Principal principal) {
         return service.getReviewsSender(principal.getName());
     }
 
@@ -51,7 +51,7 @@ public class ReviewController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('USER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateReview(@PathVariable("id") Long id, @RequestBody UpdateReviewDto reviewDto, Principal principal) {
+    public void updateReview(@PathVariable("id") Long id, @RequestBody UpdateReview reviewDto, Principal principal) {
         service.updateReview(reviewDto, id, principal.getName());
     }
 }

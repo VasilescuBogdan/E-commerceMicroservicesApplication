@@ -1,9 +1,9 @@
 package com.bogdan.shop.services.impl;
 
-import com.bogdan.shop.controllers.models.CreateOrderDto;
-import com.bogdan.shop.controllers.models.GetOrderDto;
-import com.bogdan.shop.controllers.models.GetProductDto;
-import com.bogdan.shop.controllers.models.UpdateOrderDto;
+import com.bogdan.shop.controllers.models.CreateOrder;
+import com.bogdan.shop.controllers.models.GetOrder;
+import com.bogdan.shop.controllers.models.GetProduct;
+import com.bogdan.shop.controllers.models.UpdateOrder;
 import com.bogdan.shop.integration.messages.model.OrderItem;
 import com.bogdan.shop.integration.messages.model.OrderMessage;
 import com.bogdan.shop.integration.messages.sender.OrderSender;
@@ -37,19 +37,19 @@ public class OrderServiceImpl implements OrderService {
     private final OrderSender sender;
 
     @Override
-    public void createOrder(String user, CreateOrderDto createOrderDto) {
+    public void createOrder(String user, CreateOrder createOrder) {
         repository.save(Order.builder()
                              .orderStatus(OrderStatus.CREATED)
                              .user(user)
-                             .address(createOrderDto.address())
-                             .products(createOrderDto.productIds()
-                                                     .stream()
-                                                     .map(this::getProduct)
-                                                     .toList())
+                             .address(createOrder.address())
+                             .products(createOrder.productIds()
+                                                  .stream()
+                                                  .map(this::getProduct)
+                                                  .toList())
                              .build());
     }
 
-    public List<GetOrderDto> getOrders() {
+    public List<GetOrder> getOrders() {
         return repository.findAll()
                          .stream()
                          .filter(order -> order.getOrderStatus() != OrderStatus.CREATED)
@@ -58,7 +58,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<GetOrderDto> getOrdersUser(String user) {
+    public List<GetOrder> getOrdersUser(String user) {
         return repository.findByUser(user)
                          .stream()
                          .map(this::mapOrderToGetOrderDto)
@@ -72,13 +72,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void updaterOrder(long orderId, UpdateOrderDto updateOrderDto, String user) {
+    public void updaterOrder(long orderId, UpdateOrder updateOrder, String user) {
         Order order = getValidOrder(orderId, user);
-        order.setAddress(updateOrderDto.address());
-        order.setProducts(updateOrderDto.productIds()
-                                        .stream()
-                                        .map(this::getProduct)
-                                        .collect(Collectors.toCollection(ArrayList::new)));
+        order.setAddress(updateOrder.address());
+        order.setProducts(updateOrder.productIds()
+                                     .stream()
+                                     .map(this::getProduct)
+                                     .collect(Collectors.toCollection(ArrayList::new)));
         repository.save(order);
     }
 
@@ -125,17 +125,17 @@ public class OrderServiceImpl implements OrderService {
         return order;
     }
 
-    private GetOrderDto mapOrderToGetOrderDto(Order order) {
-        return GetOrderDto.builder()
-                          .orderStatus(order.getOrderStatus())
-                          .id(order.getId())
-                          .user(order.getUser())
-                          .address(order.getAddress())
-                          .items(order.getProducts()
+    private GetOrder mapOrderToGetOrderDto(Order order) {
+        return GetOrder.builder()
+                       .orderStatus(order.getOrderStatus())
+                       .id(order.getId())
+                       .user(order.getUser())
+                       .address(order.getAddress())
+                       .items(order.getProducts()
                                       .stream()
                                       .map(this::mapProductToGetProductDto)
                                       .toList())
-                          .build();
+                       .build();
     }
 
     private Product getProduct(Long productId) {
@@ -143,11 +143,11 @@ public class OrderServiceImpl implements OrderService {
                                 .orElseThrow(() -> new ResourceDoesNotExistException("Product does not exist"));
     }
 
-    private GetProductDto mapProductToGetProductDto(Product product) {
-        return GetProductDto.builder()
-                            .name(product.getName())
-                            .description(product.getDescription())
-                            .price(product.getPrice())
-                            .build();
+    private GetProduct mapProductToGetProductDto(Product product) {
+        return GetProduct.builder()
+                         .name(product.getName())
+                         .description(product.getDescription())
+                         .price(product.getPrice())
+                         .build();
     }
 }

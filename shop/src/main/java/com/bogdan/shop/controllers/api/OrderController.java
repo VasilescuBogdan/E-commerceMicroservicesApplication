@@ -1,8 +1,8 @@
 package com.bogdan.shop.controllers.api;
 
-import com.bogdan.shop.controllers.models.CreateOrderDto;
-import com.bogdan.shop.controllers.models.GetOrderDto;
-import com.bogdan.shop.controllers.models.UpdateOrderDto;
+import com.bogdan.shop.controllers.models.CreateOrder;
+import com.bogdan.shop.controllers.models.GetOrder;
+import com.bogdan.shop.controllers.models.UpdateOrder;
 import com.bogdan.shop.services.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,21 +30,21 @@ public class OrderController {
     @PostMapping
     @PreAuthorize("hasAuthority('USER')")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createOrder(Principal principal, @RequestBody CreateOrderDto products) {
+    public void createOrder(Principal principal, @RequestBody CreateOrder products) {
         service.createOrder(principal.getName(), products);
     }
 
     @GetMapping("/user")
     @PreAuthorize("hasAuthority('USER')")
     @ResponseStatus(HttpStatus.OK)
-    public List<GetOrderDto> getOrders(Principal principal) {
+    public List<GetOrder> getOrders(Principal principal) {
         return service.getOrdersUser(principal.getName());
     }
 
     @GetMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     @ResponseStatus(HttpStatus.OK)
-    public List<GetOrderDto> getOrders() {
+    public List<GetOrder> getOrders() {
         return service.getOrders();
     }
 
@@ -58,7 +58,7 @@ public class OrderController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('USER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateOrder(@PathVariable("id") long orderId, @RequestBody UpdateOrderDto order, Principal principal) {
+    public void updateOrder(@PathVariable("id") long orderId, @RequestBody UpdateOrder order, Principal principal) {
         service.updaterOrder(orderId, order, principal.getName());
     }
 

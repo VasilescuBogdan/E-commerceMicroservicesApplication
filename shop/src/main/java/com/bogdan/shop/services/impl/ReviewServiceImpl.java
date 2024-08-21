@@ -1,9 +1,9 @@
 package com.bogdan.shop.services.impl;
 
-import com.bogdan.shop.controllers.models.CreateReviewDto;
-import com.bogdan.shop.controllers.models.GetProductDto;
-import com.bogdan.shop.controllers.models.GetReviewDetailsDto;
-import com.bogdan.shop.controllers.models.UpdateReviewDto;
+import com.bogdan.shop.controllers.models.CreateReview;
+import com.bogdan.shop.controllers.models.GetProduct;
+import com.bogdan.shop.controllers.models.GetReviewDetails;
+import com.bogdan.shop.controllers.models.UpdateReview;
 import com.bogdan.shop.util.exceptions.ResourceDoesNotExistException;
 import com.bogdan.shop.persistence.entities.Product;
 import com.bogdan.shop.persistence.entities.Review;
@@ -26,7 +26,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ProductRepository productRepository;
 
     @Override
-    public void createReview(String username, CreateReviewDto review) {
+    public void createReview(String username, CreateReview review) {
         Review save = reviewRepository.save(Review.builder()
                                                   .numberOfStars(review.numberOfStars())
                                                   .sender(username)
@@ -39,7 +39,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public List<GetReviewDetailsDto> getReviewsSender(String sender) {
+    public List<GetReviewDetails> getReviewsSender(String sender) {
         return reviewRepository.findBySender(sender)
                                .stream()
                                .map(this::mapReviewToGetReviewDetailsDto)
@@ -58,35 +58,35 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public void updateReview(UpdateReviewDto updateReviewDto, Long id, String sender) {
+    public void updateReview(UpdateReview updateReview, Long id, String sender) {
         Review review = reviewRepository.findById(id)
                                         .orElseThrow(() -> new ResourceDoesNotExistException(
                                                 "Could not find review with id " + id));
         if (!Objects.equals(review.getSender(), sender)) {
             throw new ResourceNotOwnedException("User does not own this review!");
         }
-        review.setMessage(updateReviewDto.message());
-        review.setNumberOfStars(updateReviewDto.numberOfStars());
+        review.setMessage(updateReview.message());
+        review.setNumberOfStars(updateReview.numberOfStars());
         reviewRepository.save(review);
     }
 
-    private GetReviewDetailsDto mapReviewToGetReviewDetailsDto(Review review) {
-        GetProductDto productDto = productRepository.findByReviewsContains(List.of(review))
-                                                    .map(this::mapProductToGetProductDto)
-                                                    .orElseThrow(RuntimeException::new);
-        return GetReviewDetailsDto.builder()
-                                  .product(productDto)
-                                  .sender(review.getSender())
-                                  .message(review.getMessage())
-                                  .numberOfStars(review.getNumberOfStars())
-                                  .build();
+    private GetReviewDetails mapReviewToGetReviewDetailsDto(Review review) {
+        GetProduct productDto = productRepository.findByReviewsContains(List.of(review))
+                                                 .map(this::mapProductToGetProductDto)
+                                                 .orElseThrow(RuntimeException::new);
+        return GetReviewDetails.builder()
+                               .product(productDto)
+                               .sender(review.getSender())
+                               .message(review.getMessage())
+                               .numberOfStars(review.getNumberOfStars())
+                               .build();
     }
 
-    private GetProductDto mapProductToGetProductDto(Product product) {
-        return GetProductDto.builder()
-                            .name(product.getName())
-                            .description(product.getDescription())
-                            .price(product.getPrice())
-                            .build();
+    private GetProduct mapProductToGetProductDto(Product product) {
+        return GetProduct.builder()
+                         .name(product.getName())
+                         .description(product.getDescription())
+                         .price(product.getPrice())
+                         .build();
     }
 }

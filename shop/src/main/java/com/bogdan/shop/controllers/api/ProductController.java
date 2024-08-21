@@ -1,7 +1,7 @@
 package com.bogdan.shop.controllers.api;
 
-import com.bogdan.shop.controllers.models.CreateUpdateProductDto;
-import com.bogdan.shop.controllers.models.GetProductDetailsDto;
+import com.bogdan.shop.controllers.models.CreateUpdateProduct;
+import com.bogdan.shop.controllers.models.GetProductDetails;
 import com.bogdan.shop.services.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,21 +28,21 @@ public class ProductController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('ADMIN')")
-    public void createProduct(@RequestBody CreateUpdateProductDto createUpdateProductDto) {
-        service.addProduct(createUpdateProductDto);
+    public void createProduct(@RequestBody CreateUpdateProduct createUpdateProduct) {
+        service.addProduct(createUpdateProduct);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("isAuthenticated()")
-    public List<GetProductDetailsDto> getAllProducts() {
+    public List<GetProductDetails> getAllProducts() {
         return service.getAllProducts();
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("isAuthenticated()")
-    public GetProductDetailsDto getProduct(@PathVariable("id") Long id) {
+    public GetProductDetails getProduct(@PathVariable("id") Long id) {
         return service.getProduct(id);
     }
 
@@ -56,7 +56,7 @@ public class ProductController {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAuthority('ADMIN')")
-    public void updateProduct(@PathVariable("id") Long id, @RequestBody CreateUpdateProductDto product) {
+    public void updateProduct(@PathVariable("id") Long id, @RequestBody CreateUpdateProduct product) {
         service.updateProduct(id, product);
     }
 }

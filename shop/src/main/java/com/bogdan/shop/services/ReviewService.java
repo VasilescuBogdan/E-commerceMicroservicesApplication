@@ -1,17 +1,17 @@
 package com.bogdan.shop.services;
 
-import com.bogdan.shop.controllers.models.CreateReviewDto;
-import com.bogdan.shop.controllers.models.GetReviewDetailsDto;
-import com.bogdan.shop.controllers.models.UpdateReviewDto;
+import com.bogdan.shop.controllers.models.CreateReview;
+import com.bogdan.shop.controllers.models.GetReviewDetails;
+import com.bogdan.shop.controllers.models.UpdateReview;
 
 import java.util.List;
 
 public interface ReviewService {
-    void createReview(String name, CreateReviewDto review);
+    void createReview(String name, CreateReview review);
 
-    List<GetReviewDetailsDto> getReviewsSender(String sender);
+    List<GetReviewDetails> getReviewsSender(String sender);
 
     void deleteReview(Long id, String sender);
 
-    void updateReview(UpdateReviewDto updateReviewDto, Long id, String sender);
+    void updateReview(UpdateReview updateReview, Long id, String sender);
 }
