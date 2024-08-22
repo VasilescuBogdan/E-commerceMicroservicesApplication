@@ -11,6 +11,3 @@ spring:
         show-sql: true
 server:
     port: 8081
-jwt:
-    secret:
-        key: MIIBOgIBAAJBAJIe9mnb1BJY4h9fstjC7bh/OTMQdr353s53rK65HXCs5/4lYgjpiygOk0MB8FBk9XGt+nt1i1BIaEeDz46/jXkCAwEAAQJATWw0enCtFK+d2KvXUr0uQlS+1QzDLfQIl3OXvth8/ecB3Bp+t2ujH3YmywLy6fhZi7lG7PkLo5qx/wN1SWZX0QIhANYex1Ll0jbtRB1carF3gcVS8y5MdTnvPTxXmdAD8Q4lAiEArrNjusyzckGFCNmNH76U2rwL7InTu86QDwSkMEQlj8UCIQCut9zDyx6WjVMIdlHlT/QHdOFURTVeudYI+B5de+nmNQIgeQm0yRFWKo0WfOEtk5bZTwsGP+XmGrKswJr4nrA4TfkCIBSnJeNl9uailiReiUKF+MAuQkUGgFtWf0aqpkcRJaiL
