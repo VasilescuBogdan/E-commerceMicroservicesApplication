@@ -7,7 +7,7 @@ import com.bogdan.user.persistence.entities.User;
 import com.bogdan.user.persistence.repositories.UserRepository;
 import com.bogdan.user.service.JwtService;
 import com.bogdan.user.service.impl.AuthenticationServiceImpl;
-import com.bogdan.user.utils.enums.Role;
+import com.bogdan.user.persistence.entities.enums.Role;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -7,7 +7,7 @@ import com.bogdan.user.controllers.models.UpdateUser;
 import com.bogdan.user.persistence.entities.User;
 import com.bogdan.user.service.UserService;
 import com.bogdan.user.service.impl.JwtServiceImpl;
-import com.bogdan.user.utils.enums.Role;
+import com.bogdan.user.persistence.entities.enums.Role;
 import com.bogdan.user.utils.exceptions.UserNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +56,7 @@ class UserControllerTest {
 
     private MockMvc mvc;
 
-    private String validToken;
+    private String token;
 
     @BeforeEach
     void setUp() {
@@ -64,19 +64,12 @@ class UserControllerTest {
                              .alwaysDo(MockMvcResultHandlers.log())
                              .apply(SecurityMockMvcConfigurers.springSecurity())
                              .build();
-        User userDetails = new User(null, "user1", "password1", Role.ADMIN);
-        validToken = "token";
-        Mockito.when(jwtService.isTokenValid(validToken, userDetails))
-               .thenReturn(true);
-        Mockito.when(jwtService.extractUsername(validToken))
-               .thenReturn("user1");
-        Mockito.when(userDetailsService.loadUserByUsername("user1"))
-               .thenReturn(userDetails);
     }
 
     @Test
-    void getAllUsers_returnStatusOkAndAllUsersList() throws Exception {
+    void getAllUsers_actionByAdmin_returnStatusOkAndAllUsersList() throws Exception {
         //Arrange
+        setUserWithRole(Role.ADMIN);
         List<GetUser> users = new ArrayList<>();
         users.add(GetUser.builder()
                          .username("user1")
@@ -93,7 +86,7 @@ class UserControllerTest {
 
         //Act
         ResultActions response = mvc.perform(MockMvcRequestBuilders.get("/api/users")
-                                                                   .header("Authorization", "Bearer " + validToken));
+                                                                   .header("Authorization", "Bearer " + token));
 
         //Assert
         response.andExpect(MockMvcResultMatchers.status()
@@ -113,8 +106,36 @@ class UserControllerTest {
     }
 
     @Test
-    void getUser_returnStatusOkAndUser() throws Exception {
+    void getAllUsers_actionByUser_returnStatusForbidden() throws Exception {
         //Arrange
+        setUserWithRole(Role.USER);
+        List<GetUser> users = new ArrayList<>();
+        users.add(GetUser.builder()
+                         .username("user1")
+                         .password("password1")
+                         .role(Role.ADMIN)
+                         .build());
+        users.add(GetUser.builder()
+                         .username("user2")
+                         .password("password2")
+                         .role(Role.USER)
+                         .build());
+        Mockito.when(service.getAllUsers())
+               .thenReturn(users);
+
+        //Act
+        ResultActions response = mvc.perform(MockMvcRequestBuilders.get("/api/users")
+                                                                   .header("Authorization", "Bearer " + token));
+
+        //Assert
+        response.andExpect(MockMvcResultMatchers.status()
+                                                .isForbidden());
+    }
+
+    @Test
+    void getUser_roleAdmin_returnStatusOkAndUser() throws Exception {
+        //Arrange
+        setUserWithRole(Role.ADMIN);
         long userId = 1;
         GetUser user = GetUser.builder()
                               .username("user2")
@@ -126,7 +147,7 @@ class UserControllerTest {
 
         //Act
         ResultActions response = mvc.perform(MockMvcRequestBuilders.get("/api/users/{id}", userId)
-                                                                   .header("Authorization", "Bearer " + validToken));
+                                                                   .header("Authorization", "Bearer " + token));
 
         //Assert
         response.andExpect(MockMvcResultMatchers.status()
@@ -140,27 +161,17 @@ class UserControllerTest {
     }
 
     @Test
-    void deleteUser_returnStatusNoContent() throws Exception {
-        //Act
-        ResultActions response = mvc.perform(MockMvcRequestBuilders.delete("/api/users/{id}", 2)
-                                                                   .header("Authorization", "Bearer " + validToken));
-
-        //Assert
-        response.andExpect(MockMvcResultMatchers.status()
-                                                .isNoContent());
-    }
-
-    @Test
-    void deleteUser_serviceThrowsUserNotFoundException_returnStatusBadRequest() throws Exception {
+    void getUser_roleAdminAndServiceThrowsUserNotFoundException_returnStatusBadRequest() throws Exception {
         //Arrange
+        setUserWithRole(Role.ADMIN);
         long userId = 2;
         Mockito.doThrow(UserNotFoundException.class)
                .when(service)
-               .deleteUser(userId);
+               .getUser(userId);
 
         //Act
-        ResultActions response = mvc.perform(MockMvcRequestBuilders.delete("/api/users/{id}", userId)
-                                                                   .header("Authorization", "Bearer " + validToken));
+        ResultActions response = mvc.perform(MockMvcRequestBuilders.get("/api/users/{id}", userId)
+                                                                   .header("Authorization", "Bearer " + token));
 
         //Assert
         response.andExpect(MockMvcResultMatchers.status()
@@ -168,8 +179,59 @@ class UserControllerTest {
     }
 
     @Test
-    void updateUser_returnStatusNoContent() throws Exception {
+    void getUser_roleUser_returnStatusForbidden() throws Exception {
         //Arrange
+        setUserWithRole(Role.USER);
+        long userId = 1;
+        GetUser user = GetUser.builder()
+                              .username("user2")
+                              .password("password2")
+                              .role(Role.USER)
+                              .build();
+        Mockito.when(service.getUser(userId))
+               .thenReturn(user);
+
+        //Act
+        ResultActions response = mvc.perform(MockMvcRequestBuilders.get("/api/users/{id}", userId)
+                                                                   .header("Authorization", "Bearer " + token));
+
+        //Arrange
+        response.andExpect(MockMvcResultMatchers.status()
+                                                .isForbidden());
+    }
+
+    @Test
+    void deleteUser_roleAdmin_ReturnStatusNoContent() throws Exception {
+        //Arrange
+        setUserWithRole(Role.ADMIN);
+
+        //Act
+        ResultActions response = mvc.perform(MockMvcRequestBuilders.delete("/api/users/{id}", 2)
+                                                                   .header("Authorization", "Bearer " + token));
+
+        //Assert
+        response.andExpect(MockMvcResultMatchers.status()
+                                                .isNoContent());
+    }
+
+    @Test
+    void deleteUser_roleUser_ReturnStatusForbidden() throws Exception {
+        //Arrange
+        setUserWithRole(Role.USER);
+
+        //Act
+        ResultActions response = mvc.perform(MockMvcRequestBuilders.delete("/api/users/{id}", 2)
+                                                                   .header("Authorization", "Bearer " + token));
+
+        //Assert
+        response.andExpect(MockMvcResultMatchers.status()
+                                                .isForbidden());
+    }
+
+    @Test
+    void updateUser_roleAdmin_returnStatusNoContent() throws Exception {
+        //Arrange
+        setUserWithRole(Role.ADMIN);
         UpdateUser user = UpdateUser.builder()
                                     .username("user3")
                                     .password("password3")
@@ -177,7 +239,7 @@ class UserControllerTest {
 
         //Act
         ResultActions response = mvc.perform(MockMvcRequestBuilders.put("/api/users/{id}", 1)
-                                                                   .header("Authorization", "Bearer " + validToken)
+                                                                   .header("Authorization", "Bearer " + token)
                                                                    .contentType(MediaType.APPLICATION_JSON)
                                                                    .content(objectMapper.writeValueAsString(user)));
 
@@ -187,8 +249,9 @@ class UserControllerTest {
     }
 
     @Test
-    void updateUser_serviceThrowsUserNotFoundException_returnStatusBadRequest() throws Exception {
+    void updateUser_roleAdminAndServiceThrowsUserNotFoundException_returnStatusBadRequest() throws Exception {
         //Arrange
+        setUserWithRole(Role.ADMIN);
         long userId = 1;
         UpdateUser user = UpdateUser.builder()
                                     .username("user3")
@@ -200,12 +263,47 @@ class UserControllerTest {
 
         //Act
         ResultActions response = mvc.perform(MockMvcRequestBuilders.put("/api/users/{id}", userId)
-                                                                   .header("Authorization", "Bearer " + validToken)
+                                                                   .header("Authorization", "Bearer " + token)
                                                                    .contentType(MediaType.APPLICATION_JSON)
                                                                    .content(objectMapper.writeValueAsString(user)));
 
         //Assert
         response.andExpect(MockMvcResultMatchers.status()
                                                 .isNotFound());
+    }
+
+    @Test
+    void updateUser_roleUser_returnStatusForbidden() throws Exception {
+        //Arrange
+        setUserWithRole(Role.USER);
+        long userId = 1;
+        UpdateUser user = UpdateUser.builder()
+                                    .username("user3")
+                                    .password("password3")
+                                    .build();
+        Mockito.doThrow(UserNotFoundException.class)
+               .when(service)
+               .updateUser(userId, user);
+
+        //Act
+        ResultActions response = mvc.perform(MockMvcRequestBuilders.put("/api/users/{id}", userId)
+                                                                   .header("Authorization", "Bearer " + token)
+                                                                   .contentType(MediaType.APPLICATION_JSON)
+                                                                   .content(objectMapper.writeValueAsString(user)));
+
+        //Assert
+        response.andExpect(MockMvcResultMatchers.status()
+                                                .isForbidden());
+    }
+
+    private void setUserWithRole(Role role) {
+        token = "token";
+        User userDetails = new User(null, "user", "password", role);
+        Mockito.when(jwtService.isTokenValid(token, userDetails))
+               .thenReturn(true);
+        Mockito.when(jwtService.extractUsername(token))
+               .thenReturn(userDetails.getUsername());
+        Mockito.when(userDetailsService.loadUserByUsername(userDetails.getUsername()))
+               .thenReturn(userDetails);
     }
 }

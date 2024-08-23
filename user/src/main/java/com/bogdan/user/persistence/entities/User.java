@@ -1,6 +1,6 @@
 package com.bogdan.user.persistence.entities;
 
-import com.bogdan.user.utils.enums.Role;
+import com.bogdan.user.persistence.entities.enums.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

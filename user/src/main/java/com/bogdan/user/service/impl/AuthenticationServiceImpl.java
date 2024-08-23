@@ -6,7 +6,7 @@ import com.bogdan.user.controllers.models.RegisterRequest;
 import com.bogdan.user.controllers.models.ValidationResponse;
 import com.bogdan.user.service.JwtService;
 import com.bogdan.user.service.AuthenticationService;
-import com.bogdan.user.utils.enums.Role;
+import com.bogdan.user.persistence.entities.enums.Role;
 import com.bogdan.user.persistence.entities.User;
 import com.bogdan.user.persistence.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;

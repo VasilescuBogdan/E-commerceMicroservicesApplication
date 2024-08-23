@@ -1,4 +1,4 @@
-package com.bogdan.user.utils.enums;
+package com.bogdan.user.persistence.entities.enums;
 
 import lombok.Getter;
 
