@@ -11,6 +11,7 @@ import com.bogdan.user.persistence.entities.User;
 import com.bogdan.user.persistence.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -41,8 +42,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public LoginResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.username(), request.password()));
+        if (!authentication.isAuthenticated()) {
+            throw new BadCredentialsException("Invalid credentials");
+        }
         User user = userRepository.findByUsername(request.username())
                                   .orElseThrow();
         return new LoginResponse(jwtService.generateToken(user));

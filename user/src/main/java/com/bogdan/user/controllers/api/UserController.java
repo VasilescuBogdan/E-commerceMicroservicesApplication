@@ -33,7 +33,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    @ResponseStatus(HttpStatus.FOUND)
+    @ResponseStatus(HttpStatus.OK)
     public GetUser getUser(@PathVariable("id") Long id) {
         return userService.getUser(id);
     }
