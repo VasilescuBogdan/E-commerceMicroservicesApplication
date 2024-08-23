@@ -1,6 +1,5 @@
 package com.bogdan.user.services;
 
-import com.bogdan.user.config.SecurityConfig;
 import com.bogdan.user.controllers.models.LoginRequest;
 import com.bogdan.user.controllers.models.LoginResponse;
 import com.bogdan.user.controllers.models.ValidationResponse;
@@ -16,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,7 +25,6 @@ import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
-@Import(SecurityConfig.class)
 class AuthenticationServiceTest {
 
     @Mock
