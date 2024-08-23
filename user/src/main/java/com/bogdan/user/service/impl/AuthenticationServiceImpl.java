@@ -48,7 +48,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new BadCredentialsException("Invalid credentials");
         }
         User user = userRepository.findByUsername(request.username())
-                                  .orElseThrow();
+                                  .get();
         return new LoginResponse(jwtService.generateToken(user));
     }
 
