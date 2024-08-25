@@ -64,7 +64,6 @@ public class BillServiceImpl implements BillService {
                                   .orElseThrow(() -> new ResourceDoesNotExistException("Bill does not exist!"));
 
         // handle payment logic (methodology to be determined)
-
         orderGateway.setOrderToFinished(bill.getOrderNumber());
     }
 

@@ -1,6 +1,5 @@
 package com.bogdan.shop.persistence.entities;
 
-import com.bogdan.shop.util.enums.OrderStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

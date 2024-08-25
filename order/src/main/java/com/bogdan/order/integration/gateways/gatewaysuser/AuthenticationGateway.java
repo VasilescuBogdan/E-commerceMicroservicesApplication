@@ -1,34 +1,28 @@
 package com.bogdan.order.integration.gateways.gatewaysuser;
 
 import com.bogdan.order.integration.gateways.model.ValidationResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class AuthenticationGateway {
 
     @Value("${user-service.url}")
     private String userServiceURL;
 
-    private final String authenticationPath = "/api/authentications";
+    private final WebClient webClient;
 
-    private final RestTemplate restTemplate = new RestTemplate();
-
-    public ValidationResponse validateToken(String token) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-        HttpEntity<ValidationResponse> entity = new HttpEntity<>(headers);
-        ResponseEntity<ValidationResponse> validationResponse = restTemplate.exchange(
-                userServiceURL + authenticationPath + "/validate", HttpMethod.GET, entity, ValidationResponse.class);
-        if (validationResponse.getStatusCode()
-                              .is2xxSuccessful()) {
-            return validationResponse.getBody();
-        }
-        return null;
+    public Optional<ValidationResponse> validateToken(String token) {
+        return webClient.get()
+                        .uri(userServiceURL + "/api/authentications/validate")
+                        .headers(headers -> headers.add("Authorization", "Bearer " + token))
+                        .retrieve()
+                        .bodyToMono(ValidationResponse.class)
+                        .blockOptional();
     }
 }

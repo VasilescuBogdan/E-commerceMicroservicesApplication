@@ -1,25 +1,26 @@
 package com.bogdan.order.integration.gateways.gatewaysshop;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
-@Component
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class OrderGateway {
 
     @Value("${shop-service.url}")
     private String shopServiceURL;
 
-    private static final String ORDERS_PATH = "/api/orders";
-
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final WebClient webClient;
 
     public void setOrderToFinished(Long orderId) {
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<Void> entity = new HttpEntity<>(headers);
-        restTemplate.exchange(shopServiceURL + ORDERS_PATH + "/finish/" + orderId, HttpMethod.GET, entity, Void.class);
+        webClient.patch()
+                 .uri(shopServiceURL + "/api/orders/finish/{id}", orderId)
+                 .retrieve()
+                 .toBodilessEntity()
+                 .block();
     }
 }

@@ -3,6 +3,7 @@ package com.bogdan.shop.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -22,10 +23,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(registry -> registry.requestMatchers("api/orders/finish/{id}")
-                                                       .permitAll()
-                                                       .anyRequest()
-                                                       .authenticated())
+            .authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.PATCH, "api/orders/finish/{id}")
+                                                     .permitAll()
+                                                     .anyRequest()
+                                                     .authenticated())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

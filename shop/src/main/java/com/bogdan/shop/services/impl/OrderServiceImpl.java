@@ -10,7 +10,7 @@ import com.bogdan.shop.integration.messages.sender.OrderSender;
 import com.bogdan.shop.util.exceptions.OperationNotSupportedException;
 import com.bogdan.shop.util.exceptions.ResourceDoesNotExistException;
 import com.bogdan.shop.persistence.entities.Order;
-import com.bogdan.shop.util.enums.OrderStatus;
+import com.bogdan.shop.persistence.entities.OrderStatus;
 import com.bogdan.shop.persistence.entities.Product;
 import com.bogdan.shop.persistence.repositories.OrderRepository;
 import com.bogdan.shop.persistence.repositories.ProductRepository;
