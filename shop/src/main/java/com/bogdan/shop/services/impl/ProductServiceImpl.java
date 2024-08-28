@@ -35,14 +35,14 @@ public class ProductServiceImpl implements ProductService {
     public List<GetProductDetails> getAllProducts() {
         return repository.findAll()
                          .stream()
-                         .map(this::mapProductToGetProductDetailsDto)
+                         .map(this::mapProductToGetProductDetails)
                          .toList();
     }
 
     @Override
     public GetProductDetails getProduct(Long id) {
         return repository.findById(id)
-                         .map(this::mapProductToGetProductDetailsDto)
+                         .map(this::mapProductToGetProductDetails)
                          .orElseThrow(() -> new ResourceDoesNotExistException("Product with id " + id + " not found!"));
     }
 
@@ -62,7 +62,7 @@ public class ProductServiceImpl implements ProductService {
         repository.save(updatedProduct);
     }
 
-    private GetProductDetails mapProductToGetProductDetailsDto(Product product) {
+    private GetProductDetails mapProductToGetProductDetails(Product product) {
         return GetProductDetails.builder()
                                 .name(product.getName())
                                 .description(product.getDescription())

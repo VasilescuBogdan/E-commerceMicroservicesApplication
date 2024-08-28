@@ -42,27 +42,27 @@ public class ReviewServiceImpl implements ReviewService {
     public List<GetReviewDetails> getReviewsSender(String sender) {
         return reviewRepository.findBySender(sender)
                                .stream()
-                               .map(this::mapReviewToGetReviewDetailsDto)
+                               .map(this::mapReviewToGetReviewDetails)
                                .toList();
     }
 
     @Override
-    public void deleteReview(Long id, String sender) {
+    public void deleteReview(Long id, String user) {
         Review review = reviewRepository.findById(id)
                                         .orElseThrow(() -> new ResourceDoesNotExistException(
                                                 "Could not find review with id " + id));
-        if (!Objects.equals(review.getSender(), sender)) {
+        if (!Objects.equals(review.getSender(), user)) {
             throw new ResourceNotOwnedException("User does not own this review!");
         }
         reviewRepository.delete(review);
     }
 
     @Override
-    public void updateReview(UpdateReview updateReview, Long id, String sender) {
+    public void updateReview(UpdateReview updateReview, Long id, String user) {
         Review review = reviewRepository.findById(id)
                                         .orElseThrow(() -> new ResourceDoesNotExistException(
                                                 "Could not find review with id " + id));
-        if (!Objects.equals(review.getSender(), sender)) {
+        if (!Objects.equals(review.getSender(), user)) {
             throw new ResourceNotOwnedException("User does not own this review!");
         }
         review.setMessage(updateReview.message());
@@ -70,23 +70,25 @@ public class ReviewServiceImpl implements ReviewService {
         reviewRepository.save(review);
     }
 
-    private GetReviewDetails mapReviewToGetReviewDetailsDto(Review review) {
-        GetProduct productDto = productRepository.findByReviewsContains(List.of(review))
-                                                 .map(this::mapProductToGetProductDto)
-                                                 .orElseThrow(RuntimeException::new);
+    private GetReviewDetails mapReviewToGetReviewDetails(Review review) {
+        GetProduct product = productRepository.findByReviewsContains(List.of(review))
+                                                 .map(this::mapProductToGetProduct)
+                                                 .orElseThrow(() -> new ResourceDoesNotExistException(
+                                                         "This review is for no product!"));
         return GetReviewDetails.builder()
-                               .product(productDto)
+                               .product(product)
                                .sender(review.getSender())
                                .message(review.getMessage())
                                .numberOfStars(review.getNumberOfStars())
                                .build();
     }
 
-    private GetProduct mapProductToGetProductDto(Product product) {
+    private GetProduct mapProductToGetProduct(Product product) {
         return GetProduct.builder()
                          .name(product.getName())
                          .description(product.getDescription())
                          .price(product.getPrice())
                          .build();
     }
+
 }
