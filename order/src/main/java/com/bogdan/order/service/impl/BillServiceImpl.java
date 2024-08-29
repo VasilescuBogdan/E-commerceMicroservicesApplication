@@ -20,8 +20,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BillServiceImpl implements BillService {
 
-    private final BillRepository repository;
-
     private final ItemRepository itemRepository;
 
     private final OrderGateway orderGateway;
@@ -30,59 +28,58 @@ public class BillServiceImpl implements BillService {
 
     @Override
     public void createBill(OrderDetails orderDetails) {
-        repository.save(Bill.builder()
-                            .orderNumber(orderDetails.orderNumber())
-                            .user(orderDetails.user())
-                            .dateTime(LocalDateTime.now())
-                            .items(orderDetails.orderItem()
-                                               .stream()
-                                               .map(entry -> itemRepository.save(
-                                                       new Item(null, entry.name(), entry.price())))
-                                               .toList())
-                            .build());
+        billRepository.save(Bill.builder()
+                                .orderNumber(orderDetails.orderNumber())
+                                .user(orderDetails.user())
+                                .dateTime(LocalDateTime.now())
+                                .items(orderDetails.orderItem()
+                                                   .stream()
+                                                   .map(entry -> itemRepository.save(
+                                                           new Item(null, entry.name(), entry.price())))
+                                                   .toList())
+                                .build());
     }
 
     @Override
     public List<GetBill> getBillsUser(String user) {
-        return repository.findByUser(user)
-                         .stream()
-                         .map(this::mapBillToGetBillDto)
-                         .toList();
+        return billRepository.findByUser(user)
+                             .stream()
+                             .map(this::mapBillToGetBill)
+                             .toList();
     }
 
     @Override
     public List<GetBill> getBills() {
-        return repository.findAll()
-                         .stream()
-                         .map(this::mapBillToGetBillDto)
-                         .toList();
+        return billRepository.findAll()
+                             .stream()
+                             .map(this::mapBillToGetBill)
+                             .toList();
     }
 
     @Override
     public void payBill(Long billId) {
         Bill bill = billRepository.findById(billId)
-                                  .orElseThrow(() -> new ResourceDoesNotExistException("Bill does not exist!"));
-
-        // handle payment logic (methodology to be determined)
+                                  .orElseThrow(() -> new ResourceDoesNotExistException(
+                                          "Bill with id " + billId + " does not exist!"));
         orderGateway.setOrderToFinished(bill.getOrderNumber());
     }
 
-    private GetBill mapBillToGetBillDto(Bill bill) {
+    private GetBill mapBillToGetBill(Bill bill) {
         return GetBill.builder()
                       .user(bill.getUser())
                       .dateTime(bill.getDateTime())
                       .orderNumber(bill.getOrderNumber())
                       .items(bill.getItems()
-                                    .stream()
-                                    .map(item -> GetItem.builder()
-                                                        .name(item.getName())
-                                                        .price(item.getPrice())
-                                                        .build())
-                                    .toList())
+                                 .stream()
+                                 .map(item -> GetItem.builder()
+                                                     .name(item.getName())
+                                                     .price(item.getPrice())
+                                                     .build())
+                                 .toList())
                       .total((float) bill.getItems()
-                                            .stream()
-                                            .mapToDouble(Item::getPrice)
-                                            .sum())
+                                         .stream()
+                                         .mapToDouble(Item::getPrice)
+                                         .sum())
                       .build();
     }
 }
