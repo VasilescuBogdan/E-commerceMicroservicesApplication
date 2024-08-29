@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
-    private static final String RESOURCE_DOES_NOT_EXIST_EXCEPTION_MESSAGE = "Order does not exist";
-
     private final OrderRepository repository;
 
     private final ProductRepository productRepository;
@@ -49,11 +47,12 @@ public class OrderServiceImpl implements OrderService {
                              .build());
     }
 
+    @Override
     public List<GetOrder> getOrders() {
         return repository.findAll()
                          .stream()
                          .filter(order -> order.getOrderStatus() != OrderStatus.CREATED)
-                         .map(this::mapOrderToGetOrderDto)
+                         .map(this::mapOrderToGetOrder)
                          .toList();
     }
 
@@ -61,7 +60,7 @@ public class OrderServiceImpl implements OrderService {
     public List<GetOrder> getOrdersUser(String user) {
         return repository.findByUser(user)
                          .stream()
-                         .map(this::mapOrderToGetOrderDto)
+                         .map(this::mapOrderToGetOrder)
                          .toList();
     }
 
@@ -72,7 +71,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void updaterOrder(long orderId, UpdateOrder updateOrder, String user) {
+    public void updateOrder(long orderId, UpdateOrder updateOrder, String user) {
         Order order = getValidOrder(orderId, user);
         order.setAddress(updateOrder.address());
         order.setProducts(updateOrder.productIds()
@@ -83,13 +82,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void placeOrder(Long orderId) {
-        Order order = repository.findById(orderId)
-                                .orElseThrow(() -> new ResourceDoesNotExistException(
-                                        RESOURCE_DOES_NOT_EXIST_EXCEPTION_MESSAGE));
-        if (order.getOrderStatus() != OrderStatus.CREATED) {
-            throw new OperationNotSupportedException();
-        }
+    public void placeOrder(long orderId, String user) {
+        Order order = getValidOrder(orderId, user);
         sender.sendOrderMessage(OrderMessage.builder()
                                             .user(order.getUser())
                                             .address(order.getAddress())
@@ -104,10 +98,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void finishOrder(Long orderId) {
+    public void finishOrder(long orderId) {
         Order order = repository.findById(orderId)
                                 .orElseThrow(() -> new ResourceDoesNotExistException(
-                                        RESOURCE_DOES_NOT_EXIST_EXCEPTION_MESSAGE));
+                                        String.format("Order with id %d does not exist", orderId)));
         order.setOrderStatus(OrderStatus.FINISHED);
         repository.save(order);
     }
@@ -115,7 +109,7 @@ public class OrderServiceImpl implements OrderService {
     private Order getValidOrder(long orderId, String user) {
         Order order = repository.findById(orderId)
                                 .orElseThrow(() -> new ResourceDoesNotExistException(
-                                        RESOURCE_DOES_NOT_EXIST_EXCEPTION_MESSAGE));
+                                        String.format("Order with id %d does not exist", orderId)));
         if (!Objects.equals(order.getUser(), user)) {
             throw new ResourceNotOwnedException("This is not your order!");
         }
@@ -125,25 +119,26 @@ public class OrderServiceImpl implements OrderService {
         return order;
     }
 
-    private GetOrder mapOrderToGetOrderDto(Order order) {
+    private GetOrder mapOrderToGetOrder(Order order) {
         return GetOrder.builder()
                        .orderStatus(order.getOrderStatus())
                        .id(order.getId())
                        .user(order.getUser())
                        .address(order.getAddress())
                        .items(order.getProducts()
-                                      .stream()
-                                      .map(this::mapProductToGetProductDto)
-                                      .toList())
+                                   .stream()
+                                   .map(this::mapProductToGetProduct)
+                                   .toList())
                        .build();
     }
 
     private Product getProduct(Long productId) {
         return productRepository.findById(productId)
-                                .orElseThrow(() -> new ResourceDoesNotExistException("Product does not exist"));
+                                .orElseThrow(() -> new ResourceDoesNotExistException(
+                                        "Product with id" + productId + " does not exist"));
     }
 
-    private GetProduct mapProductToGetProductDto(Product product) {
+    private GetProduct mapProductToGetProduct(Product product) {
         return GetProduct.builder()
                          .name(product.getName())
                          .description(product.getDescription())

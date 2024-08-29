@@ -13,11 +13,11 @@ public interface OrderService {
 
     void deleteOrder(long orderId, String user);
 
-    void updaterOrder(long orderId, UpdateOrder updateOrder, String user);
+    void updateOrder(long orderId, UpdateOrder updateOrder, String user);
 
     void createOrder(String user, CreateOrder createOrder);
 
-    void placeOrder(Long orderId);
+    void placeOrder(long orderId, String user);
 
-    void finishOrder(Long orderId);
+    void finishOrder(long orderId);
 }

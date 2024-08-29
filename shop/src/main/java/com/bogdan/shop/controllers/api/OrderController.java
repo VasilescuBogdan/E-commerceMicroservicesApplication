@@ -60,14 +60,14 @@ public class OrderController {
     @PreAuthorize("hasAuthority('USER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateOrder(@PathVariable("id") long orderId, @RequestBody UpdateOrder order, Principal principal) {
-        service.updaterOrder(orderId, order, principal.getName());
+        service.updateOrder(orderId, order, principal.getName());
     }
 
     @GetMapping("/place/{id}")
     @PreAuthorize("hasAuthority('USER')")
     @ResponseStatus(HttpStatus.OK)
-    public void placeOrder(@PathVariable("id") Long orderId) {
-        service.placeOrder(orderId);
+    public void placeOrder(@PathVariable("id") Long orderId, Principal principal) {
+        service.placeOrder(orderId, principal.getName());
     }
 
     @PatchMapping("/finish/{id}")
