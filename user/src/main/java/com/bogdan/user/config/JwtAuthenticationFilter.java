@@ -1,6 +1,6 @@
 package com.bogdan.user.config;
 
-import com.bogdan.user.service.impl.JwtServiceImpl;
+import com.bogdan.user.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +24,7 @@ import java.io.IOException;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtServiceImpl jwtService;
+    private final JwtService jwtService;
 
     private final UserDetailsService userDetailsService;
 

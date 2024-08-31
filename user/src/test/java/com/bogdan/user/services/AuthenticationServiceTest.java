@@ -2,33 +2,41 @@ package com.bogdan.user.services;
 
 import com.bogdan.user.controllers.models.LoginRequest;
 import com.bogdan.user.controllers.models.LoginResponse;
+import com.bogdan.user.controllers.models.RegisterRequest;
 import com.bogdan.user.controllers.models.ValidationResponse;
 import com.bogdan.user.persistence.entities.User;
 import com.bogdan.user.persistence.repositories.UserRepository;
 import com.bogdan.user.service.JwtService;
 import com.bogdan.user.service.impl.AuthenticationServiceImpl;
 import com.bogdan.user.persistence.entities.enums.Role;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class AuthenticationServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserRepository repository;
 
     @Mock
     private AuthenticationManager authenticationManager;
@@ -36,8 +44,41 @@ class AuthenticationServiceTest {
     @Mock
     private JwtService jwtService;
 
+    @Mock
+    private PasswordEncoder encoder;
+
     @InjectMocks
     private AuthenticationServiceImpl service;
+
+    @Test
+    void registerAdmin_repositorySaveIsCalled() {
+        //Arrange
+        RegisterRequest request = new RegisterRequest("user", "password");
+        doReturn("encoded password").when(encoder)
+                                    .encode(request.password());
+        User user = new User(null, request.username(), "encoded password", Role.ADMIN);
+
+        //Act
+        service.registerAdmin(request);
+
+        //Assert
+        verify(repository, times(1)).save(user);
+    }
+
+    @Test
+    void registerUser_repositorySaveIsCalled() {
+        //Arrange
+        RegisterRequest request = new RegisterRequest("user", "password");
+        doReturn("encodedPassword").when(encoder)
+                                   .encode(request.password());
+        User user = new User(null, request.username(), "encodedPassword", Role.USER);
+
+        //Act
+        service.registerUser(request);
+
+        //Assert
+        verify(repository, times(1)).save(user);
+    }
 
     @Test
     void login_userIsAuthenticated_returnLoginResponse() {
@@ -48,22 +89,24 @@ class AuthenticationServiceTest {
                                            .build();
         String token = "token";
         User user = new User(1L, request.username(), request.password(), Role.USER);
-        Authentication authentication = Mockito.mock(Authentication.class);
-        Mockito.when(authenticationManager.authenticate(
-                       new UsernamePasswordAuthenticationToken(request.username(), request.password())))
-               .thenReturn(authentication);
-        Mockito.when(authentication.isAuthenticated())
-               .thenReturn(true);
-        Mockito.when(userRepository.findByUsername(request.username()))
-               .thenReturn(Optional.of(user));
-        Mockito.when(jwtService.generateToken(user))
-               .thenReturn(token);
+        Authentication authentication = mock(Authentication.class);
+        doReturn(authentication).when(authenticationManager)
+                                .authenticate(new UsernamePasswordAuthenticationToken(request.username(),
+                                        request.password()));
+        doReturn(true).when(authentication)
+                      .isAuthenticated();
+        doReturn(Optional.of(user)).when(repository)
+                                   .findByUsername(request.username());
+        doReturn(token).when(jwtService)
+                       .generateToken(user);
 
         //Act
         LoginResponse response = service.login(request);
 
         //Assert
-        Assertions.assertEquals(token, response.token());
+        Assertions.assertThat(response.token())
+                  .isNotNull()
+                  .isEqualTo(token);
     }
 
     @Test
@@ -73,18 +116,19 @@ class AuthenticationServiceTest {
                                            .username("username")
                                            .password("password")
                                            .build();
-        Authentication authentication = Mockito.mock(Authentication.class);
-        Mockito.when(authenticationManager.authenticate(
-                       new UsernamePasswordAuthenticationToken(request.username(), request.password())))
-               .thenReturn(authentication);
-        Mockito.when(authentication.isAuthenticated())
-               .thenReturn(false);
+        Authentication authentication = mock(Authentication.class);
+        doReturn(authentication).when(authenticationManager)
+                                .authenticate(new UsernamePasswordAuthenticationToken(request.username(),
+                                        request.password()));
+        doReturn(false).when(authentication)
+                       .isAuthenticated();
 
         //Assert
-        Assertions.assertThrows(BadCredentialsException.class, () -> {
-            //Act
-            service.login(request);
-        });
+        Assertions.assertThatExceptionOfType(BadCredentialsException.class)
+                  .isThrownBy(() -> {
+                      //Act
+                      service.login(request);
+                  });
     }
 
     @Test
@@ -92,12 +136,18 @@ class AuthenticationServiceTest {
         //Arrange
         Authentication authentication = new UsernamePasswordAuthenticationToken("mario", "",
                 List.of(new SimpleGrantedAuthority("ADMIN")));
+        SecurityContext context = mock(SecurityContext.class);
+        doReturn(authentication).when(context)
+                                .getAuthentication();
+        SecurityContextHolder.setContext(context);
 
         //Act
-        ValidationResponse response = service.getValidationResponse(authentication);
+        ValidationResponse response = service.getValidationResponse();
 
         //Assert
-        Assertions.assertEquals("mario", response.username());
-        Assertions.assertEquals("ADMIN", response.role());
+        Assertions.assertThat(response.username())
+                  .isEqualTo("mario");
+        Assertions.assertThat(response.role())
+                  .isEqualTo("ADMIN");
     }
 }

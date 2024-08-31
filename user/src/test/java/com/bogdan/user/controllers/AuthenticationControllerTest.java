@@ -1,38 +1,41 @@
 package com.bogdan.user.controllers;
 
-import com.bogdan.user.config.SecurityConfig;
 import com.bogdan.user.controllers.api.AuthenticationController;
 import com.bogdan.user.controllers.models.LoginRequest;
 import com.bogdan.user.controllers.models.LoginResponse;
 import com.bogdan.user.controllers.models.RegisterRequest;
 import com.bogdan.user.controllers.models.ValidationResponse;
 import com.bogdan.user.service.AuthenticationService;
-import com.bogdan.user.service.impl.JwtServiceImpl;
+import com.bogdan.user.service.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 @WebMvcTest(AuthenticationController.class)
-@Import(SecurityConfig.class)
 class AuthenticationControllerTest {
 
     private MockMvc mockMvc;
@@ -41,10 +44,7 @@ class AuthenticationControllerTest {
     private AuthenticationService service;
 
     @MockBean
-    private JwtServiceImpl jwtService;
-
-    @MockBean
-    private AuthenticationProvider authenticationProvider;
+    private JwtService jwtService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -55,8 +55,6 @@ class AuthenticationControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-                                 .alwaysDo(MockMvcResultHandlers.log())
-                                 .apply(SecurityMockMvcConfigurers.springSecurity())
                                  .build();
     }
 
@@ -77,6 +75,7 @@ class AuthenticationControllerTest {
         //Assert
         response.andExpect(MockMvcResultMatchers.status()
                                                 .isCreated());
+        verify(service, times(1)).registerUser(request);
     }
 
     @Test
@@ -96,6 +95,7 @@ class AuthenticationControllerTest {
         //Assert
         response.andExpect(MockMvcResultMatchers.status()
                                                 .isCreated());
+        verify(service, times(1)).registerAdmin(request);
     }
 
     @Test
@@ -106,8 +106,8 @@ class AuthenticationControllerTest {
                                            .password("pass")
                                            .build();
         LoginResponse loginResponse = new LoginResponse("token");
-        Mockito.when(service.login(request))
-               .thenReturn(loginResponse);
+        doReturn(loginResponse).when(service)
+                               .login(request);
 
         //Act
         ResultActions response = mockMvc.perform(MockMvcRequestBuilders.post("/api/authentications/login")
@@ -130,9 +130,8 @@ class AuthenticationControllerTest {
                                            .password("password")
                                            .build();
 
-        Mockito.doThrow(BadCredentialsException.class)
-               .when(service)
-               .login(request);
+        doThrow(BadCredentialsException.class).when(service)
+                                              .login(request);
 
         //Act
         ResultActions response = mockMvc.perform(MockMvcRequestBuilders.post("/api/authentications/login")
@@ -146,28 +145,35 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = "bob", roles = "USER")
     void validate_validTokenProvided_returnsUserDetailsAndOkStatus() throws Exception {
         //Arrange
         ValidationResponse validationResponse = ValidationResponse.builder()
                                                                   .username("bob")
                                                                   .role("USER")
                                                                   .build();
-        Authentication auth = SecurityContextHolder.getContext()
-                                                   .getAuthentication();
-        Mockito.when(service.getValidationResponse(auth))
-               .thenReturn(validationResponse);
+        Authentication auth = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        doReturn(auth).when(securityContext)
+                      .getAuthentication();
+        SecurityContextHolder.setContext(securityContext);
+        doReturn(validationResponse).when(service)
+                                    .getValidationResponse();
 
         //Act
-        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.get("/api/authentications/validate"));
+        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.get("/api/authentications/validate")
+                                                                   .header("Authorizations", "Bearer token"))
+                                    .andReturn();
+        int responseStatus = response.getResponse()
+                                     .getStatus();
+        String responseBody = response.getResponse()
+                                      .getContentAsString();
 
         //Assert
-        response.andExpect(MockMvcResultMatchers.status()
-                                                .isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("username")
-                                                .value("bob"))
-                .andExpect(MockMvcResultMatchers.jsonPath("role")
-                                                .value("USER"));
+        Assertions.assertThat(responseStatus)
+                  .isEqualTo(HttpStatus.OK.value());
+        Assertions.assertThat(objectMapper.readValue(responseBody, ValidationResponse.class))
+                  .isEqualTo(validationResponse);
     }
 }
 
