@@ -71,10 +71,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     private GetReviewDetails mapReviewToGetReviewDetails(Review review) {
-        GetProduct product = productRepository.findByReviewsContains(List.of(review))
-                                                 .map(this::mapProductToGetProduct)
-                                                 .orElseThrow(() -> new ResourceDoesNotExistException(
-                                                         "This review is for no product!"));
+        GetProduct product = mapProductToGetProduct(productRepository.findByReviewsContains(List.of(review)));
         return GetReviewDetails.builder()
                                .product(product)
                                .sender(review.getSender())

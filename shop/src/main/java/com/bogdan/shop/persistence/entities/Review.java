@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -28,4 +30,22 @@ public class Review {
     private String message;
 
     private Integer numberOfStars;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Review review = (Review) o;
+        return Objects.equals(id, review.id) && Objects.equals(sender, review.sender) && Objects.equals(message,
+                review.message) && Objects.equals(numberOfStars, review.numberOfStars);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, sender, message, numberOfStars);
+    }
 }
