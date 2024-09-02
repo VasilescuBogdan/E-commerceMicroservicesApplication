@@ -35,8 +35,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ProductController.class)
 class ProductControllerTest {
 
-    private MockMvc mvc;
-
     @MockBean
     private AuthenticationGateway authenticationGateway;
 
@@ -50,6 +48,8 @@ class ProductControllerTest {
     private ObjectMapper objectMapper;
 
     private static final String BASE_URL = "http://localhost:8082/api/products";
+
+    private MockMvc mvc;
 
     @BeforeEach
     void setUp() {
