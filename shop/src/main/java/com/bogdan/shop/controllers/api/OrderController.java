@@ -63,7 +63,7 @@ public class OrderController {
         service.updateOrder(orderId, order, principal.getName());
     }
 
-    @GetMapping("/place/{id}")
+    @PatchMapping("/place/{id}")
     @PreAuthorize("hasAuthority('USER')")
     @ResponseStatus(HttpStatus.OK)
     public void placeOrder(@PathVariable("id") Long orderId, Principal principal) {

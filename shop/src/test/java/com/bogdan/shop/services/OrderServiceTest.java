@@ -4,6 +4,7 @@ import com.bogdan.shop.controllers.models.CreateOrder;
 import com.bogdan.shop.controllers.models.GetOrder;
 import com.bogdan.shop.controllers.models.GetProduct;
 import com.bogdan.shop.controllers.models.UpdateOrder;
+import com.bogdan.shop.integration.messages.model.OrderMessage;
 import com.bogdan.shop.integration.messages.sender.OrderSender;
 import com.bogdan.shop.persistence.entities.Order;
 import com.bogdan.shop.persistence.entities.OrderStatus;
@@ -83,7 +84,8 @@ class OrderServiceTest {
     @Test
     void getOrders_repositoryReturnsAllOrders_returnAllOrdersWithStatusCreated() {
         //Arrange
-        Product product1 = new Product(1L, "product1", 30.5F, "this is product 1", new ArrayList<>(), new ArrayList<>());
+        Product product1 = new Product(1L, "product1", 30.5F, "this is product 1", new ArrayList<>(),
+                new ArrayList<>());
         Product product2 = new Product(2L, "product2", 50F, "this is product 2", new ArrayList<>(), new ArrayList<>());
         Order order1 = new Order(1L, "user1", "address1", OrderStatus.CREATED, List.of(product1, product1, product2));
         Order order2 = new Order(2L, "user2", "address2", OrderStatus.IN_PROGRESS, List.of(product2));
@@ -107,7 +109,8 @@ class OrderServiceTest {
     @Test
     void getOrdersUser_repositoryReturnsAllOrdersAfterUser_returnAllOrders() {
         //Arrange
-        Product product1 = new Product(1L, "product1", 30.5F, "this is product 1", new ArrayList<>(), new ArrayList<>());
+        Product product1 = new Product(1L, "product1", 30.5F, "this is product 1", new ArrayList<>(),
+                new ArrayList<>());
         Product product2 = new Product(2L, "product2", 50F, "this is product 2", new ArrayList<>(), new ArrayList<>());
         Order order1 = new Order(1L, "user1", "address1", OrderStatus.CREATED, List.of(product1, product1, product2));
         Order order2 = new Order(3L, "user1", "address1", OrderStatus.FINISHED, List.of(product1));
@@ -199,7 +202,8 @@ class OrderServiceTest {
         doReturn(Optional.of(order)).when(orderRepository)
                                     .findById(orderId);
         Product product = new Product(updateOrder.productIds()
-                                                 .get(0), "product", 10F, "this product", new ArrayList<>(), new ArrayList<>());
+                                                 .get(0), "product", 10F, "this product", new ArrayList<>(),
+                new ArrayList<>());
         doReturn(Optional.of(product)).when(productRepository)
                                       .findById(updateOrder.productIds()
                                                            .get(0));
@@ -230,7 +234,7 @@ class OrderServiceTest {
     }
 
     @Test
-    void updateOrder_repositoryReturnsOrderNotOwnedByUser_throwResourceNotOwnException() {
+    void updateOrder_repositoryReturnsOrderNotOwnedByUser_throwResourceNotOwnedException() {
         //Arrange
         long orderId = 1L;
         UpdateOrder updateOrder = new UpdateOrder("address2", List.of(1L, 3L));
@@ -295,6 +299,7 @@ class OrderServiceTest {
         Order order = new Order(orderId, user, "address1", OrderStatus.CREATED, new ArrayList<>());
         doReturn(Optional.of(order)).when(orderRepository)
                                     .findById(orderId);
+        OrderMessage message = new OrderMessage(order.getUser(), order.getAddress(), List.of(), order.getId());
         Order updatedOrder = new Order(order.getId(), order.getUser(), order.getAddress(), OrderStatus.IN_PROGRESS,
                 order.getProducts());
 
@@ -302,6 +307,7 @@ class OrderServiceTest {
         service.placeOrder(orderId, user);
 
         //Assert
+        verify(sender, times(1)).sendOrderMessage(message);
         verify(orderRepository, times(1)).save(updatedOrder);
     }
 
@@ -322,7 +328,7 @@ class OrderServiceTest {
     }
 
     @Test
-    void placeOrder_repositoryReturnsOrderNotOwnedByUser_throwResourceNotOwnException() {
+    void placeOrder_repositoryReturnsOrderNotOwnedByUser_throwResourceNotOwnedException() {
         //Arrange
         long orderId = 1L;
         Order order = new Order(1L, "user1", "address1", OrderStatus.CREATED, new ArrayList<>());
@@ -362,7 +368,8 @@ class OrderServiceTest {
         Order order = new Order(orderId, "user", "address", OrderStatus.IN_PROGRESS, new ArrayList<>());
         doReturn(Optional.of(order)).when(orderRepository)
                                     .findById(orderId);
-        Order updatedOrder = new Order(order.getId(), order.getUser(), order.getAddress(), OrderStatus.FINISHED, new ArrayList<>());
+        Order updatedOrder = new Order(order.getId(), order.getUser(), order.getAddress(), OrderStatus.FINISHED,
+                new ArrayList<>());
 
         //Act
         service.finishOrder(orderId);
