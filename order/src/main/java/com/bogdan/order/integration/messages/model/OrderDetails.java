@@ -5,5 +5,5 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record OrderDetails(String user, String address, List<OrderItem> orderItem, Long orderNumber) {
+public record OrderDetails(String user, String address, List<OrderItem> orderItems, Long orderNumber) {
 }

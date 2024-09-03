@@ -2,8 +2,6 @@ package com.bogdan.order.persistence.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,6 +14,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -38,4 +37,22 @@ public class Bill {
 
     @OneToMany
     private List<Item> items;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Bill bill = (Bill) o;
+        return Objects.equals(id, bill.id) && Objects.equals(user, bill.user) && Objects.equals(orderNumber,
+                bill.orderNumber) && Objects.equals(items, bill.items);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, user, orderNumber, items);
+    }
 }

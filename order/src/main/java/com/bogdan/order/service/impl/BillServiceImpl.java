@@ -32,7 +32,7 @@ public class BillServiceImpl implements BillService {
                                 .orderNumber(orderDetails.orderNumber())
                                 .user(orderDetails.user())
                                 .dateTime(LocalDateTime.now())
-                                .items(orderDetails.orderItem()
+                                .items(orderDetails.orderItems()
                                                    .stream()
                                                    .map(entry -> itemRepository.save(
                                                            new Item(null, entry.name(), entry.price())))
