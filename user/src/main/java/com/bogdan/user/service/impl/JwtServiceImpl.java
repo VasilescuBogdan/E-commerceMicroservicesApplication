@@ -22,15 +22,12 @@ public class JwtServiceImpl implements JwtService {
 
     private final String secretKey;
 
-    public JwtServiceImpl() {
-        try {
-            KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
-            SecretKey sk = keyGenerator.generateKey();
-            secretKey = Base64.getEncoder()
-                              .encodeToString(sk.getEncoded());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+    public JwtServiceImpl() throws NoSuchAlgorithmException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
+        SecretKey sk = keyGenerator.generateKey();
+        secretKey = Base64.getEncoder()
+                          .encodeToString(sk.getEncoded());
+
     }
 
     @Override
