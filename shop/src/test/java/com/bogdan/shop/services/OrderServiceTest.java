@@ -4,7 +4,7 @@ import com.bogdan.shop.controllers.models.CreateOrder;
 import com.bogdan.shop.controllers.models.GetOrder;
 import com.bogdan.shop.controllers.models.GetProduct;
 import com.bogdan.shop.controllers.models.UpdateOrder;
-import com.bogdan.shop.integration.messages.model.OrderMessage;
+import com.bogdan.shop.integration.messages.model.OrderDetails;
 import com.bogdan.shop.integration.messages.sender.OrderSender;
 import com.bogdan.shop.persistence.entities.Order;
 import com.bogdan.shop.persistence.entities.OrderStatus;
@@ -299,7 +299,7 @@ class OrderServiceTest {
         Order order = new Order(orderId, user, "address1", OrderStatus.CREATED, new ArrayList<>());
         doReturn(Optional.of(order)).when(orderRepository)
                                     .findById(orderId);
-        OrderMessage message = new OrderMessage(order.getUser(), order.getAddress(), List.of(), order.getId());
+        OrderDetails message = new OrderDetails(order.getUser(), order.getAddress(), List.of(), order.getId());
         Order updatedOrder = new Order(order.getId(), order.getUser(), order.getAddress(), OrderStatus.IN_PROGRESS,
                 order.getProducts());
 

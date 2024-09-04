@@ -5,7 +5,7 @@ import com.bogdan.shop.controllers.models.GetOrder;
 import com.bogdan.shop.controllers.models.GetProduct;
 import com.bogdan.shop.controllers.models.UpdateOrder;
 import com.bogdan.shop.integration.messages.model.OrderItem;
-import com.bogdan.shop.integration.messages.model.OrderMessage;
+import com.bogdan.shop.integration.messages.model.OrderDetails;
 import com.bogdan.shop.integration.messages.sender.OrderSender;
 import com.bogdan.shop.util.exceptions.OperationNotSupportedException;
 import com.bogdan.shop.util.exceptions.ResourceDoesNotExistException;
@@ -84,7 +84,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void placeOrder(long orderId, String user) {
         Order order = getValidOrder(orderId, user);
-        sender.sendOrderMessage(OrderMessage.builder()
+        sender.sendOrderMessage(OrderDetails.builder()
                                             .user(order.getUser())
                                             .address(order.getAddress())
                                             .orderItem(order.getProducts()
