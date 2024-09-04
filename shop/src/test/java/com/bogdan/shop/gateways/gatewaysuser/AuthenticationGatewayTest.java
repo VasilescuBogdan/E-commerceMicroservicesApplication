@@ -2,83 +2,73 @@ package com.bogdan.shop.gateways.gatewaysuser;
 
 import com.bogdan.shop.integration.gateways.gatewaysuser.AuthenticationGateway;
 import com.bogdan.shop.integration.gateways.model.ValidationResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(MockitoExtension.class)
 class AuthenticationGatewayTest {
 
-    @Mock
-    private WebClient webClient;
+    private MockWebServer webServer;
 
-    @Mock
-    private WebClient.RequestHeadersUriSpec requestHeadersUriSpec;
-
-    @Mock
-    private WebClient.RequestHeadersSpec requestHeadersSpec;
-
-    @Mock
-    private WebClient.ResponseSpec responseSpec;
-
-    @InjectMocks
     private AuthenticationGateway authenticationGateway;
 
-    @Value("${user-service.url}")
-    private String userServiceURL;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Test
-    void validateToken_ShouldReturnValidationResponse_WhenTokenIsValid() {
-        // Arrange
-        String token = "valid-token";
-        ValidationResponse mockResponse = new ValidationResponse("USER", "user");
+    @BeforeEach
+    void setUp() {
+        webServer = new MockWebServer();
+        WebClient webClient = WebClient.builder()
+                                       .baseUrl(webServer.url("/")
+                                                         .toString())
+                                       .build();
+        authenticationGateway = new AuthenticationGateway(webClient);
+    }
 
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.headers(any())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(ValidationResponse.class)).thenReturn(Mono.just(mockResponse));
-
-        // Act
-        Optional<ValidationResponse> result = authenticationGateway.validateToken(token);
-
-        // Assert
-        assertEquals(Optional.of(mockResponse), result);
-        verify(webClient).get();
-        verify(requestHeadersUriSpec).uri(userServiceURL + "/api/authentications/validate");
-        verify(requestHeadersSpec).headers(any());
-        verify(requestHeadersSpec).retrieve();
-        verify(responseSpec).bodyToMono(ValidationResponse.class);
+    @AfterEach
+    void tearDown() throws IOException {
+        webServer.close();
     }
 
     @Test
-    void validateToken_ShouldReturnEmptyOptional_WhenTokenIsInvalid() {
-        // Arrange
-        String token = "invalid-token";
+    void validateToken_whenGivenValidToken_returnValidationResponse() throws JsonProcessingException {
+        //Arrange
+        String token = "token";
+        ValidationResponse validationResponse = new ValidationResponse("USER", "user");
+        webServer.enqueue(new MockResponse().setResponseCode(HttpStatus.OK.value())
+                                            .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                                            .setBody(objectMapper.writeValueAsString(validationResponse)));
 
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.headers(any())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(ValidationResponse.class)).thenReturn(Mono.empty());
+        //Act
+        Optional<ValidationResponse> response = authenticationGateway.validateToken(token);
 
-        // Act
-        Optional<ValidationResponse> result = authenticationGateway.validateToken(token);
+        //Assert
+        assertThat(response).isNotEmpty()
+                            .hasValue(validationResponse);
+    }
 
-        // Assert
-        assertEquals(Optional.empty(), result);
+    @Test
+    void validateToken_whenGivenInvalidToken_returnNothing() {
+        //Arrange
+        String token = "token";
+        webServer.enqueue(new MockResponse().setResponseCode(HttpStatus.UNAUTHORIZED.value()));
+
+        //Act
+        Optional<ValidationResponse> response = authenticationGateway.validateToken(token);
+
+        //Assert
+        assertThat(response).isEmpty();
     }
 }
