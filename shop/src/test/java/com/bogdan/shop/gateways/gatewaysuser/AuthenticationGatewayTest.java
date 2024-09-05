@@ -1,74 +1,63 @@
 package com.bogdan.shop.gateways.gatewaysuser;
 
-import com.bogdan.shop.integration.gateways.gatewaysuser.AuthenticationGateway;
-import com.bogdan.shop.integration.gateways.model.ValidationResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.WebClient;
+    import com.bogdan.shop.integration.gateways.gatewaysuser.AuthenticationGateway;
+    import com.bogdan.shop.integration.gateways.model.ValidationResponse;
+    import com.fasterxml.jackson.core.JsonProcessingException;
+    import com.fasterxml.jackson.databind.ObjectMapper;
+    import org.junit.jupiter.api.Test;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
+    import org.springframework.http.MediaType;
+    import org.springframework.test.web.client.MockRestServiceServer;
 
-import java.io.IOException;
-import java.util.Optional;
+    import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+    import static org.assertj.core.api.Assertions.assertThat;
+    import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+    import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+    import static org.springframework.test.web.client.response.MockRestResponseCreators.withUnauthorizedRequest;
 
-class AuthenticationGatewayTest {
+    @RestClientTest(AuthenticationGateway.class)
+    class AuthenticationGatewayTest {
 
-    private MockWebServer webServer;
+        @Autowired
+        MockRestServiceServer server;
 
-    private AuthenticationGateway authenticationGateway;
+        @Autowired
+        AuthenticationGateway gateway;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+        @Autowired
+        ObjectMapper mapper;
 
-    @BeforeEach
-    void setUp() {
-        webServer = new MockWebServer();
-        WebClient webClient = WebClient.builder()
-                                       .baseUrl(webServer.url("/")
-                                                         .toString())
-                                       .build();
-        authenticationGateway = new AuthenticationGateway(webClient);
+        private static final String BASE_URL = "http://localhost:8081/api/authentications";
+
+        @Test
+        void validateToken_whenGivenValidToken_returnValidationResponse() throws JsonProcessingException {
+            //Arrange
+            String token = "token";
+            ValidationResponse validationResponse = new ValidationResponse("USER", "user");
+            server.expect(requestTo(BASE_URL + "/validate"))
+                  .andRespond(withSuccess(mapper.writeValueAsString(validationResponse), MediaType.APPLICATION_JSON));
+
+            //Act
+            Optional<ValidationResponse> response = gateway.validateToken(token);
+
+            //Assert
+            assertThat(response).isNotEmpty()
+                                .hasValue(validationResponse);
+        }
+
+        @Test
+        void validateToken_whenGivenInvalidToken_returnNothing() {
+            //Arrange
+            String token = "token";
+            server.expect(requestTo(BASE_URL + "/validate"))
+                  .andRespond(withUnauthorizedRequest());
+
+            //Act
+            Optional<ValidationResponse> response = gateway.validateToken(token);
+
+            //Assert
+            assertThat(response).isEmpty();
+        }
     }
-
-    @AfterEach
-    void tearDown() throws IOException {
-        webServer.close();
-    }
-
-    @Test
-    void validateToken_whenGivenValidToken_returnValidationResponse() throws JsonProcessingException {
-        //Arrange
-        String token = "token";
-        ValidationResponse validationResponse = new ValidationResponse("USER", "user");
-        webServer.enqueue(new MockResponse().setResponseCode(HttpStatus.OK.value())
-                                            .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                                            .setBody(objectMapper.writeValueAsString(validationResponse)));
-
-        //Act
-        Optional<ValidationResponse> response = authenticationGateway.validateToken(token);
-
-        //Assert
-        assertThat(response).isNotEmpty()
-                            .hasValue(validationResponse);
-    }
-
-    @Test
-    void validateToken_whenGivenInvalidToken_returnNothing() {
-        //Arrange
-        String token = "token";
-        webServer.enqueue(new MockResponse().setResponseCode(HttpStatus.UNAUTHORIZED.value()));
-
-        //Act
-        Optional<ValidationResponse> response = authenticationGateway.validateToken(token);
-
-        //Assert
-        assertThat(response).isEmpty();
-    }
-}
