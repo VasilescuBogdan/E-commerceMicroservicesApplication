@@ -1,5 +1,6 @@
-package com.bogdan.order.utils.exception;
+package com.bogdan.order.controller.api;
 
+import com.bogdan.order.utils.exception.ResourceDoesNotExistException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

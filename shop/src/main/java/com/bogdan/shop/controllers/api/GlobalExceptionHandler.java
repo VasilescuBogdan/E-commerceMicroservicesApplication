@@ -1,5 +1,8 @@
-package com.bogdan.shop.util.exceptions;
+package com.bogdan.shop.controllers.api;
 
+import com.bogdan.shop.util.exceptions.OperationNotSupportedException;
+import com.bogdan.shop.util.exceptions.ResourceDoesNotExistException;
+import com.bogdan.shop.util.exceptions.ResourceNotOwnedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;

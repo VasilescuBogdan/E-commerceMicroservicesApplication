@@ -21,3 +21,8 @@ rabbitmq:
         exchange: generate_bill
     routing:
         key: bill_key
+springdoc:
+    swagger-ui:
+        path: /swagger-ui.html
+    api-docs:
+        path: /docs
