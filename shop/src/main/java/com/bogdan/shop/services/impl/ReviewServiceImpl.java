@@ -27,12 +27,13 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public void createReview(String username, CreateReview review) {
+        Product product = productRepository.getReferenceById(review.productId());
         Review save = reviewRepository.save(Review.builder()
                                                   .numberOfStars(review.numberOfStars())
                                                   .sender(username)
                                                   .message(review.message())
+                                                  .product(product)
                                                   .build());
-        Product product = productRepository.getReferenceById(review.productId());
         product.getReviews()
                .add(save);
         productRepository.save(product);

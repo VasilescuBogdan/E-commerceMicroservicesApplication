@@ -44,11 +44,12 @@ class ReviewServiceTest {
         //Arrange
         String username = "user";
         CreateReview createReview = new CreateReview(1L, 3, "it's good");
-        Review review = new Review(1L, username, createReview.message(), createReview.numberOfStars());
-        doReturn(review).when(reviewRepository)
-                        .save(new Review(null, review.getSender(), review.getMessage(), review.getNumberOfStars()));
         Product product = new Product(createReview.productId(), "product", 15F, "this is product", new ArrayList<>(),
                 new ArrayList<>());
+        Review review = new Review(1L, username, createReview.message(), createReview.numberOfStars(), product);
+        doReturn(review).when(reviewRepository)
+                        .save(new Review(null, review.getSender(), review.getMessage(), review.getNumberOfStars(),
+                                product));
         doReturn(product).when(productRepository)
                          .getReferenceById(createReview.productId());
         product.getReviews()
@@ -64,16 +65,15 @@ class ReviewServiceTest {
     @Test
     void getReviewSender_repositoryReturnsReviews_returnReviewDetails() {
         //Arrange
-        Review review1 = new Review(1L, "user1", "is good", 4);
-        Review review2 = new Review(3L, "user1", "is bad", 1);
         Product product = new Product(1L, "name", 30.5F, "description", new ArrayList<>(), new ArrayList<>());
-        doReturn(List.of(review1, review2)).when(reviewRepository)
-                                           .findBySender("user1");
-        doReturn(product).when(productRepository)
-                         .findByReviewsContains(List.of(review1));
+        Review review1 = new Review(1L, "user1", "is good", 4, product);
+        Review review2 = new Review(3L, "user1", "is bad", 1, product);
         doReturn(product).when(productRepository)
                          .findByReviewsContains(List.of(review2));
-
+        doReturn(product).when(productRepository)
+                         .findByReviewsContains(List.of(review1));
+        doReturn(List.of(review1, review2)).when(reviewRepository)
+                                           .findBySender("user1");
 
         //Act
         List<GetReviewDetails> actualReviews = service.getReviewsSender("user1");
@@ -90,7 +90,7 @@ class ReviewServiceTest {
         //Arrange
         Long reviewId = 1L;
         String user = "user";
-        Review review = new Review(reviewId, user, "is good", 5);
+        Review review = new Review(reviewId, user, "is good", 5, null);
         doReturn(Optional.of(review)).when(reviewRepository)
                                      .findById(reviewId);
 
@@ -107,7 +107,7 @@ class ReviewServiceTest {
         Long reviewId = 1L;
         String user = "user";
         doReturn(Optional.empty()).when(reviewRepository)
-                                     .findById(reviewId);
+                                  .findById(reviewId);
 
         //Assert
         assertThatExceptionOfType(ResourceDoesNotExistException.class).isThrownBy(() -> {
@@ -123,8 +123,8 @@ class ReviewServiceTest {
         //Arrange
         Long reviewId = 1L;
         String user = "user";
-        doReturn(Optional.of(new Review(reviewId, "user2", "", 0))).when(reviewRepository)
-                                                                   .findById(reviewId);
+        doReturn(Optional.of(new Review(reviewId, "user2", "", 0, null))).when(reviewRepository)
+                                                                         .findById(reviewId);
 
         //Assert
         assertThatExceptionOfType(ResourceNotOwnedException.class).isThrownBy(() -> {
@@ -140,7 +140,7 @@ class ReviewServiceTest {
         Long reviewId = 1L;
         String user = "user";
         UpdateReview updateReview = new UpdateReview("new message", 0);
-        Review review = new Review(1L, user, "", 0);
+        Review review = new Review(1L, user, "", 0, null);
         doReturn(Optional.of(review)).when(reviewRepository)
                                      .findById(reviewId);
 
@@ -149,7 +149,8 @@ class ReviewServiceTest {
 
         //Assert
         verify(reviewRepository, times(1)).save(
-                new Review(review.getId(), review.getSender(), updateReview.message(), updateReview.numberOfStars()));
+                new Review(review.getId(), review.getSender(), updateReview.message(), updateReview.numberOfStars(),
+                        review.getProduct()));
     }
 
     @Test
@@ -177,7 +178,7 @@ class ReviewServiceTest {
         Long reviewId = 1L;
         String user = "user";
         UpdateReview updateReview = new UpdateReview("new message", 0);
-        Review review = new Review(1L, "user2", "", 0);
+        Review review = new Review(1L, "user2", "", 0, null);
         doReturn(Optional.of(review)).when(reviewRepository)
                                      .findById(reviewId);
 

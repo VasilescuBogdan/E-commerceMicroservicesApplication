@@ -39,12 +39,12 @@ public class Product {
     private String description;
 
     @ToString.Exclude
-    @OneToMany
-    private List<Review> reviews;
-
-    @ToString.Exclude
     @ManyToMany(mappedBy = "products")
     private List<Order> orders = new ArrayList<>();
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "product")
+    private List<Review> reviews = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
