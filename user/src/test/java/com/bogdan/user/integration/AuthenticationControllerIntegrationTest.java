@@ -31,7 +31,7 @@ class AuthenticationControllerIntegrationTest {
 
     @Container
     @ServiceConnection
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.4.2");
+    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0.32");
 
     @Autowired
     private UserRepository userRepository;
