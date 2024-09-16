@@ -25,6 +25,9 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class AuthenticationControllerIntegrationTest {
+class AuthenticationControllerIntTest {
 
     @Container
     @ServiceConnection
@@ -81,6 +84,11 @@ class AuthenticationControllerIntegrationTest {
 
         //Assert
         response.andExpect(status().isCreated());
+        List<User> updatedList = userRepository.findAll();
+        User savedUser = updatedList.get(updatedList.size() - 1);
+        assertThat(savedUser.getUsername()).isEqualTo(registerRequest.username());
+        assertThat(encoder.matches(registerRequest.password(), savedUser.getPassword())).isTrue();
+        assertThat(savedUser.getRole()).isEqualTo(Role.USER);
     }
 
     @Test
@@ -96,6 +104,11 @@ class AuthenticationControllerIntegrationTest {
 
         //Assert
         response.andExpect(status().isCreated());
+        List<User> updatedList = userRepository.findAll();
+        User savedUser = updatedList.get(updatedList.size() - 1);
+        assertThat(savedUser.getUsername()).isEqualTo(registerRequest.username());
+        assertThat(encoder.matches(registerRequest.password(), savedUser.getPassword())).isTrue();
+        assertThat(savedUser.getRole()).isEqualTo(Role.ADMIN);
     }
 
     @Test

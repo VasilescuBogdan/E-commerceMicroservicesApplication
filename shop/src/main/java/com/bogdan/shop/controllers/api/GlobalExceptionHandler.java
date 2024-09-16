@@ -11,10 +11,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(value = {ResourceDoesNotExistException.class, ResourceNotOwnedException.class,
-            OperationNotSupportedException.class})
+    @ExceptionHandler(value = {ResourceNotOwnedException.class, OperationNotSupportedException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleExceptions(Exception ex) {
         return ex.getMessage();
     }
+
+    @ExceptionHandler(value = {ResourceDoesNotExistException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleResourceNotFound(Exception ex) {
+        return ex.getMessage();
+    }
+
 }

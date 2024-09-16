@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(OrderController.class)
@@ -86,7 +86,7 @@ class OrderControllerTest {
     }
 
     @Test
-    void createOrder_serviceThrowsResourceDoesNotExistException_responseStatusBadRequest() throws Exception {
+    void createOrder_serviceThrowsResourceDoesNotExistException_responseStatusNotFound() throws Exception {
         //Arrange
         CreateOrder order = new CreateOrder("address", List.of(1L));
         doThrow(ResourceDoesNotExistException.class).when(service)
@@ -98,7 +98,7 @@ class OrderControllerTest {
                                                            .content(mapper.writeValueAsString(order)));
 
         //Assert
-        response.andExpect(status().isBadRequest());
+        response.andExpect(status().isNotFound());
     }
 
     @Test
@@ -107,76 +107,32 @@ class OrderControllerTest {
         GetProduct product = new GetProduct("product", "this is product", 10F);
         GetOrder getOrder1 = new GetOrder(1L, user, "address1", OrderStatus.CREATED, List.of(product));
         GetOrder getOrder2 = new GetOrder(2L, user, "address2", OrderStatus.FINISHED, List.of(product));
-        doReturn(List.of(getOrder1, getOrder2)).when(service)
-                                               .getOrdersUser(user);
+        List<GetOrder> orderList = List.of(getOrder1, getOrder2);
+        doReturn(orderList).when(service)
+                           .getOrdersUser(user);
 
         //Act
         ResultActions response = mvc.perform(get(BASE_URL + "/user").principal(principal));
 
         //Assert
         response.andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(2))
-                .andExpect(jsonPath("$[0].id").value(getOrder1.id()))
-                .andExpect(jsonPath("$[0].user").value(getOrder1.user()))
-                .andExpect(jsonPath("$[0].address").value(getOrder1.address()))
-                .andExpect(jsonPath("$[0].orderStatus").value(getOrder1.orderStatus()
-                                                                       .name()))
-                .andExpect(jsonPath("$[0].items.size()").value(1))
-                .andExpect(jsonPath("$[0].items[0].name").value(getOrder1.items()
-                                                                         .get(0)
-                                                                         .name()))
-                .andExpect(jsonPath("$[0].items[0].description").value(getOrder1.items()
-                                                                                .get(0)
-                                                                                .description()))
-                .andExpect(jsonPath("$[0].items[0].price").value(getOrder1.items()
-                                                                          .get(0)
-                                                                          .price()))
-                .andExpect(jsonPath("$[1].id").value(getOrder2.id()))
-                .andExpect(jsonPath("$[1].user").value(getOrder2.user()))
-                .andExpect(jsonPath("$[1].address").value(getOrder2.address()))
-                .andExpect(jsonPath("$[1].orderStatus").value(getOrder2.orderStatus()
-                                                                       .name()))
-                .andExpect(jsonPath("$[1].items.size()").value(1))
-                .andExpect(jsonPath("$[1].items[0].name").value(getOrder2.items()
-                                                                         .get(0)
-                                                                         .name()))
-                .andExpect(jsonPath("$[1].items[0].description").value(getOrder2.items()
-                                                                                .get(0)
-                                                                                .description()))
-                .andExpect(jsonPath("$[1].items[0].price").value(getOrder2.items()
-                                                                          .get(0)
-                                                                          .price()));
+                .andExpect(content().json(mapper.writeValueAsString(orderList)));
     }
 
     @Test
     void getOrdersAdmin_serviceReturnsOrders_responseStatusOkAndReturnOrders() throws Exception {
         //Arrange
         GetProduct product = new GetProduct("product", "this is product", 10F);
-        GetOrder getOrder1 = new GetOrder(1L, "user1", "address", OrderStatus.CREATED, List.of(product));
-        doReturn(List.of(getOrder1)).when(service)
-                                    .getOrders();
+        GetOrder getOrder = new GetOrder(1L, "user1", "address", OrderStatus.CREATED, List.of(product));
+        doReturn(List.of(getOrder)).when(service)
+                          .getOrders();
 
         //Act
         ResultActions response = mvc.perform(get(BASE_URL));
 
         //Assert
         response.andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(1))
-                .andExpect(jsonPath("$[0].id").value(getOrder1.id()))
-                .andExpect(jsonPath("$[0].user").value(getOrder1.user()))
-                .andExpect(jsonPath("$[0].address").value(getOrder1.address()))
-                .andExpect(jsonPath("$[0].orderStatus").value(getOrder1.orderStatus()
-                                                                       .name()))
-                .andExpect(jsonPath("$[0].items.size()").value(1))
-                .andExpect(jsonPath("$[0].items[0].name").value(getOrder1.items()
-                                                                         .get(0)
-                                                                         .name()))
-                .andExpect(jsonPath("$[0].items[0].description").value(getOrder1.items()
-                                                                                .get(0)
-                                                                                .description()))
-                .andExpect(jsonPath("$[0].items[0].price").value(getOrder1.items()
-                                                                          .get(0)
-                                                                          .price()));
+                .andExpect(content().json(mapper.writeValueAsString(List.of(getOrder))));
     }
 
     @Test
@@ -193,7 +149,7 @@ class OrderControllerTest {
     }
 
     @Test
-    void deleteOrder_serviceThrowsResourceDoesNotExistException_responseBadRequest() throws Exception {
+    void deleteOrder_serviceThrowsResourceDoesNotExistException_responseNotFound() throws Exception {
         //Arrange
         long orderId = 1L;
         doThrow(ResourceDoesNotExistException.class).when(service)
@@ -203,7 +159,7 @@ class OrderControllerTest {
         ResultActions response = mvc.perform(delete(BASE_URL + "/{id}", orderId).principal(principal));
 
         //Assert
-        response.andExpect(status().isBadRequest());
+        response.andExpect(status().isNotFound());
     }
 
     @Test
@@ -252,7 +208,7 @@ class OrderControllerTest {
     }
 
     @Test
-    void updateOrder_serviceThrowsResourceDoesNotExistException_responseBadRequest() throws Exception {
+    void updateOrder_serviceThrowsResourceDoesNotExistException_responseNotFound() throws Exception {
         //Arrange
         long orderId = 1L;
         UpdateOrder updateOrder = new UpdateOrder("new address", List.of(1L, 2L));
@@ -266,7 +222,7 @@ class OrderControllerTest {
                                                                              .principal(principal));
 
         //Assert
-        response.andExpect(status().isBadRequest());
+        response.andExpect(status().isNotFound());
     }
 
     @Test
@@ -319,7 +275,7 @@ class OrderControllerTest {
     }
 
     @Test
-    void placeOrder_serviceThrowsResourceDoesNotExistException_responseBadRequest() throws Exception {
+    void placeOrder_serviceThrowsResourceDoesNotExistException_responseNotFound() throws Exception {
         //Arrange
         long orderId = 1L;
         doThrow(ResourceDoesNotExistException.class).when(service)
@@ -329,7 +285,7 @@ class OrderControllerTest {
         ResultActions response = mvc.perform(patch(BASE_URL + "/place/{id}", orderId).principal(principal));
 
         //Assert
-        response.andExpect(status().isBadRequest());
+        response.andExpect(status().isNotFound());
     }
 
     @Test
@@ -374,7 +330,7 @@ class OrderControllerTest {
     }
 
     @Test
-    void finishOrder_serviceThrowsResourceDoesNotExistException_responseBadRequest() throws Exception {
+    void finishOrder_serviceThrowsResourceDoesNotExistException_responseNotFound() throws Exception {
         //Arrange
         long orderId = 1L;
         doThrow(ResourceDoesNotExistException.class).when(service)
@@ -384,6 +340,6 @@ class OrderControllerTest {
         ResultActions response = mvc.perform(patch(BASE_URL + "/finish/{id}", orderId));
 
         //Assert
-        response.andExpect(status().isBadRequest());
+        response.andExpect(status().isNotFound());
     }
 }

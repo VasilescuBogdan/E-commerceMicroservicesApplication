@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProductController.class)
@@ -77,30 +77,16 @@ class ProductControllerTest {
         GetProductDetails product1 = new GetProductDetails("product1", "this is product1", 13F,
                 List.of(new GetReview("is bad", 1, "user1")));
         GetProductDetails product2 = new GetProductDetails("product2", "this is product2", 15.5F, null);
-        doReturn(List.of(product1, product2)).when(service)
-                                             .getAllProducts();
+        List<GetProductDetails> productList = List.of(product1, product2);
+        doReturn(productList).when(service)
+                          .getAllProducts();
 
         //Act
         ResultActions response = mvc.perform(get(BASE_URL));
 
         //Assert
         response.andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(2))
-                .andExpect(jsonPath("$[0].name").value(product1.name()))
-                .andExpect(jsonPath("$[0].description").value(product1.description()))
-                .andExpect(jsonPath("$[0].price").value(product1.price()))
-                .andExpect(jsonPath("$[0].reviews[0].message").value(product1.reviews()
-                                                                             .get(0)
-                                                                             .message()))
-                .andExpect(jsonPath("$[0].reviews[0].numberOfStars").value(product1.reviews()
-                                                                                   .get(0)
-                                                                                   .numberOfStars()))
-                .andExpect(jsonPath("$[0].reviews[0].sender").value(product1.reviews()
-                                                                            .get(0)
-                                                                            .sender()))
-                .andExpect(jsonPath("$[1].name").value(product2.name()))
-                .andExpect(jsonPath("$[1].description").value(product2.description()))
-                .andExpect(jsonPath("$[1].price").value(product2.price()));
+                .andExpect(content().json(objectMapper.writeValueAsString(productList)));
     }
 
     @Test
@@ -117,22 +103,11 @@ class ProductControllerTest {
 
         //Assert
         response.andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(product.name()))
-                .andExpect(jsonPath("$.description").value(product.description()))
-                .andExpect(jsonPath("$.price").value(product.price()))
-                .andExpect(jsonPath("$.reviews[0].message").value(product.reviews()
-                                                                         .get(0)
-                                                                         .message()))
-                .andExpect(jsonPath("$.reviews[0].numberOfStars").value(product.reviews()
-                                                                               .get(0)
-                                                                               .numberOfStars()))
-                .andExpect(jsonPath("$.reviews[0].sender").value(product.reviews()
-                                                                        .get(0)
-                                                                        .sender()));
+                .andExpect(content().json(objectMapper.writeValueAsString(product)));
     }
 
     @Test
-    void getProduct_serviceThrowsRecourseDoesNotExistException_returnStatusBadRequest() throws Exception {
+    void getProduct_serviceThrowsRecourseDoesNotExistException_returnStatusNotFound() throws Exception {
         //Arrange
         long productId = 1L;
         doThrow(ResourceDoesNotExistException.class).when(service)
@@ -142,7 +117,7 @@ class ProductControllerTest {
         ResultActions response = mvc.perform(get(BASE_URL + "/{id}", productId));
 
         //Assert
-        response.andExpect(status().isBadRequest());
+        response.andExpect(status().isNotFound());
     }
 
     @Test
@@ -176,7 +151,7 @@ class ProductControllerTest {
 
 
     @Test
-    void updateProduct_serviceThrowsResourceDoesNotExistException_returnStatusBadRequest() throws Exception {
+    void updateProduct_serviceThrowsResourceDoesNotExistException_returnStatusNotFound() throws Exception {
         //Arrange
         long productId = 1L;
         CreateUpdateProduct product = new CreateUpdateProduct("updated product", "updated description", 10F);
@@ -189,6 +164,6 @@ class ProductControllerTest {
                                                                                        product)));
 
         //Assert
-        response.andExpect(status().isBadRequest());
+        response.andExpect(status().isNotFound());
     }
 }

@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ReviewController.class)
@@ -88,37 +88,20 @@ class ReviewControllerTest {
         GetProduct getProduct = new GetProduct("product", "this is product", 10F);
         GetReviewDetails reviewDetails1 = new GetReviewDetails("is ok", 3, sender, getProduct);
         GetReviewDetails reviewDetails2 = new GetReviewDetails("is bad", 1, sender, getProduct);
-        doReturn(List.of(reviewDetails1, reviewDetails2)).when(service)
-                                                         .getReviewsSender(sender);
+        List<GetReviewDetails> reviewList = List.of(reviewDetails1, reviewDetails2);
+        doReturn(reviewList).when(service)
+                                .getReviewsSender(sender);
 
         //Act
         ResultActions response = mvc.perform(get(BASE_URL).principal(principal));
 
         //Assert
         response.andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(2))
-                .andExpect(jsonPath("$[0].sender").value(reviewDetails1.sender()))
-                .andExpect(jsonPath("$[0].message").value(reviewDetails1.message()))
-                .andExpect(jsonPath("$[0].numberOfStars").value(reviewDetails1.numberOfStars()))
-                .andExpect(jsonPath("$[0].product.name").value(reviewDetails1.product()
-                                                                             .name()))
-                .andExpect(jsonPath("$[0].product.description").value(reviewDetails1.product()
-                                                                                    .description()))
-                .andExpect(jsonPath("$[0].product.price").value(reviewDetails1.product()
-                                                                              .price()))
-                .andExpect(jsonPath("$[1].sender").value(sender))
-                .andExpect(jsonPath("$[1].message").value(reviewDetails2.message()))
-                .andExpect(jsonPath("$[1].numberOfStars").value(reviewDetails2.numberOfStars()))
-                .andExpect(jsonPath("$[1].product.name").value(reviewDetails2.product()
-                                                                             .name()))
-                .andExpect(jsonPath("$[1].product.description").value(reviewDetails2.product()
-                                                                                    .description()))
-                .andExpect(jsonPath("$[1].product.price").value(reviewDetails2.product()
-                                                                              .price()));
+                .andExpect(content().json(objectMapper.writeValueAsString(reviewList)));
     }
 
     @Test
-    void getReviewsSender_serviceThrowsResourceDoesNotExistException_responseStatusBadRequest() throws Exception {
+    void getReviewsSender_serviceThrowsResourceDoesNotExistException_responseStatusNotFound() throws Exception {
         //Arrange
         doThrow(ResourceDoesNotExistException.class).when(service)
                                                     .getReviewsSender(sender);
@@ -127,7 +110,7 @@ class ReviewControllerTest {
         ResultActions response = mvc.perform(get(BASE_URL).principal(principal));
 
         //Assert
-        response.andExpect(status().isBadRequest());
+        response.andExpect(status().isNotFound());
     }
 
     @Test
@@ -144,7 +127,7 @@ class ReviewControllerTest {
     }
 
     @Test
-    void deleteReview_serviceThrowsResourceDoesNotExistException_responseStatusBadRequest() throws Exception {
+    void deleteReview_serviceThrowsResourceDoesNotExistException_responseStatusNotFound() throws Exception {
         //Arrange
         Long reviewId = 1L;
         doThrow(ResourceDoesNotExistException.class).when(service)
@@ -154,7 +137,7 @@ class ReviewControllerTest {
         ResultActions response = mvc.perform(delete(BASE_URL + "/{id}", reviewId).principal(principal));
 
         //Assert
-        response.andExpect(status().isBadRequest());
+        response.andExpect(status().isNotFound());
     }
 
     @Test
@@ -189,7 +172,7 @@ class ReviewControllerTest {
     }
 
     @Test
-    void updateReview_serviceThrowsResourceDoesNotExistException_responseStatusBadRequest() throws Exception {
+    void updateReview_serviceThrowsResourceDoesNotExistException_responseStatusNotFound() throws Exception {
         //Arrange
         Long reviewId = 1L;
         UpdateReview updateReview = new UpdateReview("is good", 3);
@@ -203,7 +186,7 @@ class ReviewControllerTest {
                                                                                       updateReview)));
 
         //Assert
-        response.andExpect(status().isBadRequest());
+        response.andExpect(status().isNotFound());
     }
 
     @Test

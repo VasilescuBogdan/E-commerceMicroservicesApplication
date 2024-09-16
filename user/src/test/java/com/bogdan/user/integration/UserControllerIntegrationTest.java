@@ -84,7 +84,7 @@ class UserControllerIntegrationTest {
         User user4 = new User(4L, "user3", "password4", Role.USER);
         usersList.addAll(List.of(user1, user2, user3, user4));
         userRepository.saveAll(usersList);
-        headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.generateToken(user3));
+        headers.setBearerAuth(jwtService.generateToken(user3));
     }
 
     @AfterEach
@@ -147,7 +147,7 @@ class UserControllerIntegrationTest {
     }
 
     @Test
-    void deleteUser_responseStatusNoContentAndCheckIfUserIsActualDeleted() throws Exception {
+    void deleteUser_userExists_responseStatusNoContentAndCheckIfUserIsActualDeleted() throws Exception {
         //Arrange
         long userId = 1L;
 

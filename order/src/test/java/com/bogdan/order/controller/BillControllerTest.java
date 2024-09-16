@@ -6,6 +6,7 @@ import com.bogdan.order.controller.model.GetItem;
 import com.bogdan.order.integration.gateways.gatewaysuser.AuthenticationGateway;
 import com.bogdan.order.service.BillService;
 import com.bogdan.order.utils.exception.ResourceDoesNotExistException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(BillController.class)
@@ -41,6 +42,9 @@ class BillControllerTest {
 
     @Autowired
     private WebApplicationContext context;
+
+    @Autowired
+    private ObjectMapper mapper;
 
     private static final String BASE_URL = "http://localhost:8083/api/bills";
 
@@ -61,27 +65,16 @@ class BillControllerTest {
                       .getName();
         GetBill bill = new GetBill(user, LocalDateTime.of(2000, 10, 11, 12, 55, 30), 2L,
                 List.of(new GetItem("product", 10F)), 10F);
-        doReturn(List.of(bill)).when(service)
-                               .getBillsUser(user);
+        List<GetBill> billList = List.of(bill);
+        doReturn(billList).when(service)
+                       .getBillsUser(user);
 
         //Act
         ResultActions response = mvc.perform(get(BASE_URL + "/user").principal(principal));
 
         //Assert
         response.andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(1))
-                .andExpect(jsonPath("$[0].user").value(bill.user()))
-                .andExpect(jsonPath("$[0].dateTime").value(bill.dateTime().toString()))
-                .andExpect(jsonPath("$[0].orderNumber").value(bill.orderNumber()))
-                .andExpect(jsonPath("$[0].total").value(bill.total()))
-                .andExpect(jsonPath("$[0].items.size()").value(bill.items()
-                                                                   .size()))
-                .andExpect(jsonPath("$[0].items[0].name").value(bill.items()
-                                                                    .get(0)
-                                                                    .name()))
-                .andExpect(jsonPath("$[0].items[0].price").value(bill.items()
-                                                                     .get(0)
-                                                                     .price()));
+                .andExpect(content().json(mapper.writeValueAsString(billList)));
     }
 
     @Test
@@ -89,27 +82,16 @@ class BillControllerTest {
         //Arrange
         GetBill bill = new GetBill("user", LocalDateTime.of(2000, 10, 11, 12, 55, 30), 2L,
                 List.of(new GetItem("product", 10F)), 10F);
-        doReturn(List.of(bill)).when(service)
-                               .getBills();
+        List<GetBill> billList = List.of(bill);
+        doReturn(billList).when(service)
+                          .getBills();
 
         //Act
         ResultActions response = mvc.perform(get(BASE_URL));
 
         //Assert
         response.andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(1))
-                .andExpect(jsonPath("$[0].user").value(bill.user()))
-                .andExpect(jsonPath("$[0].dateTime").value(bill.dateTime().toString()))
-                .andExpect(jsonPath("$[0].orderNumber").value(bill.orderNumber()))
-                .andExpect(jsonPath("$[0].total").value(bill.total()))
-                .andExpect(jsonPath("$[0].items.size()").value(bill.items()
-                                                                   .size()))
-                .andExpect(jsonPath("$[0].items[0].name").value(bill.items()
-                                                                    .get(0)
-                                                                    .name()))
-                .andExpect(jsonPath("$[0].items[0].price").value(bill.items()
-                                                                     .get(0)
-                                                                     .price()));
+                .andExpect(content().json(mapper.writeValueAsString(billList)));
     }
 
     @Test
@@ -126,7 +108,7 @@ class BillControllerTest {
     }
 
     @Test
-    void payBill_serviceThrowsResourceDoesNotExistException_responseStatusBadRequest() throws Exception {
+    void payBill_serviceThrowsResourceDoesNotExistException_responseStatusNotFound() throws Exception {
         //Arrange
         long billId = 1L;
         doThrow(ResourceDoesNotExistException.class).when(service)
@@ -136,6 +118,6 @@ class BillControllerTest {
         ResultActions response = mvc.perform(patch(BASE_URL + "/{id}", billId));
 
         //Assert
-        response.andExpect(status().isBadRequest());
+        response.andExpect(status().isNotFound());
     }
 }
