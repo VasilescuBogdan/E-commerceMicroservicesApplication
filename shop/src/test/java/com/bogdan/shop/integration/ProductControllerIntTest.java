@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class ProductControllerIntTest extends TestSetup {
+class ProductControllerIntTest extends IntTest {
 
     @Autowired
     private ProductRepository productRepository;
@@ -59,7 +59,7 @@ class ProductControllerIntTest extends TestSetup {
         //Act
         ResultActions response = mvc.perform(post(baseUrl).contentType(MediaType.APPLICATION_JSON)
                                                           .header(HttpHeaders.AUTHORIZATION,
-                                                                  generateTokenAdmin("admin"))
+                                                                  generateTokenAdmin())
                                                           .content(mapper.writeValueAsString(product)));
 
         //Assert
@@ -128,7 +128,7 @@ class ProductControllerIntTest extends TestSetup {
 
         //Act
         ResultActions response = mvc.perform(
-                get(baseUrl + "/{id}", productId).header(HttpHeaders.AUTHORIZATION, generateTokenAdmin("admin")));
+                get(baseUrl + "/{id}", productId).header(HttpHeaders.AUTHORIZATION, generateTokenAdmin()));
 
         //Assert
         response.andExpect(status().isOk())
@@ -142,7 +142,7 @@ class ProductControllerIntTest extends TestSetup {
 
         //Act
         ResultActions response = mvc.perform(
-                get(baseUrl + "/{id}", productId).header(HttpHeaders.AUTHORIZATION, generateTokenAdmin("admin")));
+                get(baseUrl + "/{id}", productId).header(HttpHeaders.AUTHORIZATION, generateTokenAdmin()));
 
         //Assert
         response.andExpect(status().isNotFound());
@@ -155,7 +155,7 @@ class ProductControllerIntTest extends TestSetup {
 
         //Act
         ResultActions response = mvc.perform(
-                delete(baseUrl + "/{id}", productId).header(HttpHeaders.AUTHORIZATION, generateTokenAdmin("admin")));
+                delete(baseUrl + "/{id}", productId).header(HttpHeaders.AUTHORIZATION, generateTokenAdmin()));
 
         //Assert
         response.andExpect(status().isNoContent());
@@ -175,7 +175,7 @@ class ProductControllerIntTest extends TestSetup {
 
         //Act
         ResultActions response = mvc.perform(put(baseUrl + "/{id}", productId).header(HttpHeaders.AUTHORIZATION,
-                                                                                      generateTokenAdmin("admin"))
+                                                                                      generateTokenAdmin())
                                                                               .contentType(MediaType.APPLICATION_JSON)
                                                                               .content(mapper.writeValueAsString(
                                                                                       updateProduct)));
@@ -200,7 +200,7 @@ class ProductControllerIntTest extends TestSetup {
 
         //Act
         ResultActions response = mvc.perform(put(baseUrl + "/{id}", productId).header(HttpHeaders.AUTHORIZATION,
-                                                                                      generateTokenAdmin("admin"))
+                                                                                      generateTokenAdmin())
                                                                               .contentType(MediaType.APPLICATION_JSON)
                                                                               .content(mapper.writeValueAsString(
                                                                                       updateProduct)));

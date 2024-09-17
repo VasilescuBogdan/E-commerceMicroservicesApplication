@@ -6,24 +6,12 @@ import com.bogdan.user.controllers.models.ValidationResponse;
 import com.bogdan.user.persistence.entities.User;
 import com.bogdan.user.persistence.entities.enums.Role;
 import com.bogdan.user.persistence.repositories.UserRepository;
-import com.bogdan.user.service.JwtService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
@@ -35,36 +23,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Testcontainers
-@AutoConfigureMockMvc
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class AuthenticationControllerIntTest {
-
-    @Container
-    @ServiceConnection
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:9.0.1");
+class AuthenticationControllerIntTest extends IntTest {
 
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder encoder;
-
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper mapper;
-
-    @LocalServerPort
-    private int randomServerPort;
-
-    private final String baseUrl = "http://localhost:" + randomServerPort + "/api/authentications";
-
+    private final String baseUrl = "http://localhost:" + port + "/api/authentications";
 
     @AfterEach
     void tearDown() {

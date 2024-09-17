@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,7 +26,7 @@ import static org.mockito.Mockito.doReturn;
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
-public abstract class TestSetup {
+public abstract class IntTest {
 
     @Container
     @ServiceConnection
@@ -48,15 +47,12 @@ public abstract class TestSetup {
     @LocalServerPort
     protected int port;
 
-    @Value("${user-service.url}")
-    private String userServiceUrl;
-
     protected String generateTokenUser(String username) {
         return generateTestToken(username, "USER");
     }
 
-    protected String generateTokenAdmin(String username) {
-        return generateTestToken(username, "ADMIN");
+    protected String generateTokenAdmin() {
+        return generateTestToken("admin", "ADMIN");
     }
 
     private String generateTestToken(String username, String role) {

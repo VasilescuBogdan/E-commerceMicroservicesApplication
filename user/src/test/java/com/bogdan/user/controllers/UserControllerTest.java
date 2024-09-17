@@ -39,7 +39,7 @@ class UserControllerTest {
     private UserService service;
 
     @MockBean
-    JwtService jwtService;
+    private JwtService jwtService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -101,7 +101,7 @@ class UserControllerTest {
     }
 
     @Test
-    void getUser_ServiceThrowsUserNotFoundException_returnStatusBadRequest() throws Exception {
+    void getUser_ServiceThrowsUserNotFoundException_returnStatusNotFound() throws Exception {
         //Arrange
         long userId = 2;
         Mockito.doThrow(UserNotFoundException.class)
@@ -148,7 +148,7 @@ class UserControllerTest {
     }
 
     @Test
-    void updateUser_serviceThrowsUserNotFoundException_returnStatusBadRequest() throws Exception {
+    void updateUser_serviceThrowsUserNotFoundException_returnStatusNotFound() throws Exception {
         //Arrange
         long userId = 1;
         UpdateUser user = UpdateUser.builder()
