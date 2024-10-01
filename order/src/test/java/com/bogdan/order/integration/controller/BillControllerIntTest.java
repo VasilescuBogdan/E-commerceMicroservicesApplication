@@ -1,4 +1,4 @@
-package com.bogdan.order.integration;
+package com.bogdan.order.integration.controller;
 
 import com.bogdan.order.controller.model.GetBill;
 import com.bogdan.order.controller.model.GetItem;
