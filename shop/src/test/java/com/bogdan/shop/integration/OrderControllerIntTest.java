@@ -64,12 +64,10 @@ class OrderControllerIntTest extends IntTest {
 
     @BeforeEach
     void setUp() {
-        product = new Product(null, "product", 25F, "this is product", new ArrayList<>(), new ArrayList<>());
+        product = new Product(null, "product", 25F, "this is product", new ArrayList<>());
         Order order1 = new Order(null, "user1", "address1", OrderStatus.CREATED, new ArrayList<>());
         Order order2 = new Order(null, "user1", "address2", OrderStatus.FINISHED, new ArrayList<>());
         Order order3 = new Order(null, "user2", "address3", OrderStatus.IN_PROGRESS, new ArrayList<>());
-        product.getOrders()
-               .addAll(List.of(order1, order2, order3));
         product = productRepository.save(product);
         order1.getProducts()
               .add(product);

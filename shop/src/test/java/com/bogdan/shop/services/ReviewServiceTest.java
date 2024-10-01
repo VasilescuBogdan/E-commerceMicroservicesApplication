@@ -44,8 +44,7 @@ class ReviewServiceTest {
         //Arrange
         String username = "user";
         CreateReview createReview = new CreateReview(1L, 3, "it's good");
-        Product product = new Product(createReview.productId(), "product", 15F, "this is product", new ArrayList<>(),
-                new ArrayList<>());
+        Product product = new Product(createReview.productId(), "product", 15F, "this is product", new ArrayList<>());
         Review review = new Review(1L, username, createReview.message(), createReview.numberOfStars(), product);
         doReturn(review).when(reviewRepository)
                         .save(new Review(null, review.getSender(), review.getMessage(), review.getNumberOfStars(),
@@ -65,7 +64,7 @@ class ReviewServiceTest {
     @Test
     void getReviewSender_repositoryReturnsReviews_returnReviewDetails() {
         //Arrange
-        Product product = new Product(1L, "name", 30.5F, "description", new ArrayList<>(), new ArrayList<>());
+        Product product = new Product(1L, "name", 30.5F, "description", new ArrayList<>());
         Review review1 = new Review(1L, "user1", "is good", 4, product);
         Review review2 = new Review(3L, "user1", "is bad", 1, product);
         doReturn(product).when(productRepository)

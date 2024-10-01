@@ -36,10 +36,10 @@ class ProductControllerIntTest extends IntTest {
 
     @BeforeEach
     void setUp() {
-        Product product1 = new Product(null, "product1", 10F, "this is product1", new ArrayList<>(), new ArrayList<>());
-        Product product2 = new Product(null, "product2", 15F, "this is product2", new ArrayList<>(), new ArrayList<>());
-        Product product3 = new Product(null, "product3", 18F, "this is product3", new ArrayList<>(), new ArrayList<>());
-        Product product4 = new Product(null, "product4", 50F, "this is product4", new ArrayList<>(), new ArrayList<>());
+        Product product1 = new Product(null, "product1", 10F, "this is product1", new ArrayList<>());
+        Product product2 = new Product(null, "product2", 15F, "this is product2", new ArrayList<>());
+        Product product3 = new Product(null, "product3", 18F, "this is product3", new ArrayList<>());
+        Product product4 = new Product(null, "product4", 50F, "this is product4", new ArrayList<>());
         products.addAll(List.of(product1, product2, product3, product4));
         productRepository.saveAll(products);
     }

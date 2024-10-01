@@ -25,7 +25,6 @@ public class ProductServiceImpl implements ProductService {
                                     .name(product.name())
                                     .description(product.description())
                                     .price(product.price())
-                                    .orders(new ArrayList<>())
                                     .reviews(new ArrayList<>())
                                     .build();
         repository.save(newProduct);

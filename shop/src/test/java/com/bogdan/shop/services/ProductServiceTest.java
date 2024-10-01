@@ -43,15 +43,15 @@ class ProductServiceTest {
         //Assert
         verify(repository, times(1)).save(
                 new Product(null, createProduct.name(), createProduct.price(), createProduct.description(),
-                        new ArrayList<>(), new ArrayList<>()));
+                        new ArrayList<>()));
     }
 
     @Test
     void getAllProducts_repositoryReturnsListOfProducts_returnProductsDetails() {
         //Arrange
-        Product product1 = new Product(1L, "product 1", 30.5F, "this is product1", null,
+        Product product1 = new Product(1L, "product 1", 30.5F, "this is product1",
                 List.of(new Review(1L, "user1", "is good", 5, null)));
-        Product product2 = new Product(2L, "product2", 50F, "this is product2", null,
+        Product product2 = new Product(2L, "product2", 50F, "this is product2",
                 List.of(new Review(2L, "user1", "is Ok", 3, null)));
         doReturn(List.of(product1, product2)).when(repository)
                                              .findAll();
@@ -73,7 +73,7 @@ class ProductServiceTest {
     void getProduct_repositoryReturnsProduct_returnProductDetails() {
         //Arrange
         Long productId = 1L;
-        Product product = new Product(1L, "product 1", 30.5F, "this is product1", null,
+        Product product = new Product(1L, "product 1", 30.5F, "this is product1",
                 List.of(new Review(1L, "user1", "is good", 5, null)));
         doReturn(Optional.of(product)).when(repository)
                                       .findById(productId);
@@ -119,7 +119,7 @@ class ProductServiceTest {
         //Arrange
         CreateUpdateProduct updatedProduct = new CreateUpdateProduct("new prod", "new description", 30.0F);
         Long productId = 99L;
-        Product product = new Product(productId, "product", 30.5F, "this is product", null,
+        Product product = new Product(productId, "product", 30.5F, "this is product",
                 List.of(new Review(1L, "user1", "is good", 5, null)));
 
         doReturn(Optional.of(product)).when(repository)
@@ -131,7 +131,7 @@ class ProductServiceTest {
         //Assert
         verify(repository, times(1)).save(
                 new Product(productId, updatedProduct.name(), updatedProduct.price(), updatedProduct.description(),
-                        product.getOrders(), product.getReviews()));
+                        product.getReviews()));
     }
 
     @Test

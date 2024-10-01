@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,10 +38,6 @@ public class Product {
     private String description;
 
     @ToString.Exclude
-    @ManyToMany(mappedBy = "products")
-    private List<Order> orders = new ArrayList<>();
-
-    @ToString.Exclude
     @OneToMany(mappedBy = "product")
     private List<Review> reviews = new ArrayList<>();
 
@@ -57,11 +52,11 @@ public class Product {
         Product product = (Product) o;
         return Objects.equals(id, product.id) && Objects.equals(name, product.name) && Objects.equals(price,
                 product.price) && Objects.equals(description, product.description) && Objects.equals(reviews,
-                product.reviews) && Objects.equals(orders, product.orders);
+                product.reviews);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, price, description, reviews, orders);
+        return Objects.hash(id, name, price, description, reviews);
     }
 }

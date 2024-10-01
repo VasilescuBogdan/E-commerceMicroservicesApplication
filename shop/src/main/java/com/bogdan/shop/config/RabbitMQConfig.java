@@ -1,4 +1,4 @@
-package com.bogdan.order.config;
+package com.bogdan.shop.config;
 
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Binding;
@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class RabbitMqConfig {
+public class RabbitMQConfig {
 
     @Value("${rabbitmq.name.queue}")
     private String queue;

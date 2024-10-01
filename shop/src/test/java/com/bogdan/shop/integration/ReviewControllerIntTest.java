@@ -44,7 +44,7 @@ class ReviewControllerIntTest extends IntTest {
 
     @BeforeEach
     void setUp() {
-        product = new Product(null, "product", 10.5F, "description", new ArrayList<>(), new ArrayList<>());
+        product = new Product(null, "product", 10.5F, "description", new ArrayList<>());
         Review review1 = new Review(null, "user1", "message1", 3, product);
         Review review2 = new Review(null, "user2", "message2", 5, product);
         Review review3 = new Review(null, "user1", "message3", 1, product);

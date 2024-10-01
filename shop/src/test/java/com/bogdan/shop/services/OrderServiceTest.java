@@ -52,8 +52,7 @@ class OrderServiceTest {
         String user = "user";
         CreateOrder createOrder = new CreateOrder("address", List.of(1L));
         Product product = new Product(createOrder.productIds()
-                                                 .get(0), "product", 10F, "this is product", new ArrayList<>(),
-                new ArrayList<>());
+                                                 .get(0), "product", 10F, "this is product", new ArrayList<>());
         doReturn(Optional.of(product)).when(productRepository)
                                       .findById(createOrder.productIds()
                                                            .get(0));
@@ -84,9 +83,8 @@ class OrderServiceTest {
     @Test
     void getOrders_repositoryReturnsAllOrders_returnAllOrdersWithStatusCreated() {
         //Arrange
-        Product product1 = new Product(1L, "product1", 30.5F, "this is product 1", new ArrayList<>(),
-                new ArrayList<>());
-        Product product2 = new Product(2L, "product2", 50F, "this is product 2", new ArrayList<>(), new ArrayList<>());
+        Product product1 = new Product(1L, "product1", 30.5F, "this is product 1", new ArrayList<>());
+        Product product2 = new Product(2L, "product2", 50F, "this is product 2", new ArrayList<>());
         Order order1 = new Order(1L, "user1", "address1", OrderStatus.CREATED, List.of(product1, product1, product2));
         Order order2 = new Order(2L, "user2", "address2", OrderStatus.IN_PROGRESS, List.of(product2));
         Order order3 = new Order(3L, "user1", "address1", OrderStatus.FINISHED, List.of(product1));
@@ -109,9 +107,8 @@ class OrderServiceTest {
     @Test
     void getOrdersUser_repositoryReturnsAllOrdersAfterUser_returnAllOrders() {
         //Arrange
-        Product product1 = new Product(1L, "product1", 30.5F, "this is product 1", new ArrayList<>(),
-                new ArrayList<>());
-        Product product2 = new Product(2L, "product2", 50F, "this is product 2", new ArrayList<>(), new ArrayList<>());
+        Product product1 = new Product(1L, "product1", 30.5F, "this is product 1", new ArrayList<>());
+        Product product2 = new Product(2L, "product2", 50F, "this is product 2", new ArrayList<>());
         Order order1 = new Order(1L, "user1", "address1", OrderStatus.CREATED, List.of(product1, product1, product2));
         Order order2 = new Order(3L, "user1", "address1", OrderStatus.FINISHED, List.of(product1));
         doReturn(List.of(order1, order2)).when(orderRepository)
@@ -202,8 +199,7 @@ class OrderServiceTest {
         doReturn(Optional.of(order)).when(orderRepository)
                                     .findById(orderId);
         Product product = new Product(updateOrder.productIds()
-                                                 .get(0), "product", 10F, "this product", new ArrayList<>(),
-                new ArrayList<>());
+                                                 .get(0), "product", 10F, "this product", new ArrayList<>());
         doReturn(Optional.of(product)).when(productRepository)
                                       .findById(updateOrder.productIds()
                                                            .get(0));
