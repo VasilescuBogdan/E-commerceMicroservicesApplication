@@ -1,5 +1,5 @@
 services:
-    db:
+    db_user:
         image: mysql:8.4.2
         environment:
             MYSQL_ROOT_PASSWORD: root
@@ -8,8 +8,28 @@ services:
             MYSQL_DATABASE: user
         ports:
             - "3306:3306"
-        volumes:
-            - ./init:/docker-entrypoint-initdb.d
+    db_shop:
+        image: mysql:8.4.2
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_USER: user
+            MYSQL_PASSWORD: user
+            MYSQL_DATABASE: shop
+        ports:
+            - "3307:3307"
+        command:
+            - --port=3307
+    db_order:
+        image: mysql:8.4.2
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_USER: user
+            MYSQL_PASSWORD: user
+            MYSQL_DATABASE: order
+        ports:
+            - "3308:3308"
+        command:
+            - --port=3308
     rabbitmq:
         image: rabbitmq:3.13.6-management
         ports:
