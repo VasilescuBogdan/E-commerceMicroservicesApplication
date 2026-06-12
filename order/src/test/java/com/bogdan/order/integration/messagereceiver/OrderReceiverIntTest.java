@@ -2,7 +2,6 @@ package com.bogdan.order.integration.messagereceiver;
 
 import com.bogdan.order.integration.messages.model.OrderDetails;
 import com.bogdan.order.integration.messages.model.OrderItem;
-import com.bogdan.order.integration.messages.receiver.MessageReceiver;
 import com.bogdan.order.persistence.entities.Bill;
 import com.bogdan.order.persistence.repositories.BillRepository;
 import jakarta.transaction.Transactional;
